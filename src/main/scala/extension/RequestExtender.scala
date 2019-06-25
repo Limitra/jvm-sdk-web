@@ -74,6 +74,9 @@ final class RequestExtender[A](request: Request[A]) {
     dataTable.Data.Length = query.CountVal
 
     val dropLen = dataTable.Page.Length * (dataTable.Page.Number - 1)
+    val countLen = dataTable.Data.Length / dataTable.Page.Length
+    dataTable.Page.Count = if(countLen == 0) 1 else countLen
+
     dataTable.Data.Source = source.drop(dropLen).take(dataTable.Page.Length).ToRef[C].ToJson
 
     Results.Ok(dataTable.ToJson)
