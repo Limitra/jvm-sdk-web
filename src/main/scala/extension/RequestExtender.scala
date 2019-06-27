@@ -71,13 +71,17 @@ final class RequestExtender[A](request: Request[A]) {
       })
     }
 
-    dataTable.Data.Length = query.CountVal
+    dataTable.Data.Length = source.CountVal
 
     val dropLen = dataTable.Page.Length * (dataTable.Page.Number - 1)
     val countLen = dataTable.Data.Length / dataTable.Page.Length
-    dataTable.Page.Count = if(countLen == 0) 1 else countLen
+    dataTable.Page.Count = if(countLen == 0) 1 else {
+      if(dataTable.Data.Length % dataTable.Page.Length > 0) countLen + 1 else countLen
+    }
 
-    dataTable.Data.Source = source.drop(dropLen).take(dataTable.Page.Length).ToRef[C].ToJson
+    val refSource = source.drop(dropLen).take(dataTable.Page.Length).ToRef[C]
+    dataTable.Data.Source = refSource.ToJson
+    dataTable.Page.Length = refSource.length
 
     Results.Ok(dataTable.ToJson)
   }
