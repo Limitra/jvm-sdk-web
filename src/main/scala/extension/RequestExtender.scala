@@ -2,7 +2,7 @@ package com.limitra.sdk.web.extension
 
 import com.limitra.sdk.database.mysql.DbSource
 import com.limitra.sdk.web._
-import com.limitra.sdk.web.definition.{DataTable, DataTableFilter, DataTableSort}
+import com.limitra.sdk.web.definition.{DataTable, DataTableFilter, DataTableSort, SelectInput}
 import play.api.libs.json.Writes
 import play.api.mvc.{Request, Results}
 import slick.lifted.Query
@@ -24,7 +24,7 @@ final class RequestExtender[A](request: Request[A]) {
                     (filterCall: (DataTableFilter) => Query[_, _, Seq] = null)(implicit tag: ClassTag[C], wr: Writes[C]) = {
     import db._
     val dataTable = new DataTable
-    dataTable.Search = request.queryString.get("search").flatMap(x => x.headOption)
+    dataTable.Search = request.queryString.get("search").filter(x => !x.isEmpty).map(x => x.head).headOption
 
     val keys = request.queryString.get("keys")
     val values = request.queryString.get("values")
@@ -84,5 +84,35 @@ final class RequestExtender[A](request: Request[A]) {
     dataTable.Page.Length = refSource.length
 
     Results.Ok(dataTable.ToJson)
+  }
+
+  def ToSelectInput[C](db: DbSource, query: Query[_, _, Seq])
+                    (searchCall: (String) => Query[_, _, Seq] = null)(implicit tag: ClassTag[C], wr: Writes[C]) = {
+    import db._
+
+    val selectInput = new SelectInput
+
+    selectInput.Search = request.queryString.get("search").filter(x => !x.isEmpty).map(x => x.head).headOption
+    selectInput.Page.Number = request.queryString.get("page").flatMap(x => x.flatMap(y => Try(y.toLong).toOption).headOption).getOrElse(1.toLong)
+    selectInput.Page.Length = request.queryString.get("length").flatMap(x => x.flatMap(y => Try(y.toLong).toOption).headOption).getOrElse(1.toLong)
+    selectInput.Data.Values = request.queryString.get("values").map(x => x.flatMap(y => Try(y.toLong).toOption)).getOrElse(Seq())
+
+    var source = query
+    if(searchCall != null && selectInput.Search.isDefined) {
+      source = searchCall(selectInput.Search.get)
+    }
+
+    val dropLen = selectInput.Page.Length * (selectInput.Page.Number  - 1)
+    val dataLen = source.CountVal
+    val countLen = dataLen / selectInput.Page.Length
+    selectInput.Page.Count = if(countLen == 0) 1 else {
+      if(selectInput.Data.Length % selectInput.Page.Length > 0) countLen + 1 else countLen
+    }
+
+    val refSource = source.drop(dropLen).take(selectInput.Page.Length).ToRef[C]
+    selectInput.Data.Source = refSource.ToJson
+    selectInput.Page.Length = refSource.length
+
+    Results.Ok(selectInput.ToJson)
   }
 }
