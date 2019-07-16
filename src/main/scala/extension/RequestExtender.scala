@@ -2,7 +2,7 @@ package com.limitra.sdk.web.extension
 
 import com.limitra.sdk.database.mysql.DbSource
 import com.limitra.sdk.web._
-import com.limitra.sdk.web.definition.{DataTable, DataTableFilter, DataTableSort, SelectInput}
+import com.limitra.sdk.web.definition.{DataTable, DataTableFilter, DataTableSort, RouteGuard, SelectInput}
 import play.api.libs.json.Writes
 import play.api.mvc.{Request, Results}
 import slick.lifted.Query
@@ -114,5 +114,41 @@ final class RequestExtender[A](request: Request[A]) {
     selectInput.Page.Length = refSource.length
 
     Results.Ok(selectInput.ToJson)
+  }
+
+  def ToRouteGuard[C](db: DbSource)
+                     (homeCall: (String, Option[String]) => Query[_, _, Seq])
+                     (routeCall: (String, String, Option[String]) => Query[_, _, Seq])
+                     (errorCall: (String, Option[String]) => Query[_, _, Seq])(implicit tag: ClassTag[C], wr: Writes[C]) = {
+    import db._
+
+    val path = request.queryString.get("path").filter(x => !x.isEmpty).map(x => x.head).headOption.getOrElse("")
+    val lang = request.queryString.get("lang").filter(x => !x.isEmpty).map(x => x.head).headOption
+
+    val guard = new RouteGuard()
+
+    if (homeCall != null && routeCall != null && errorCall != null) {
+      var source: slick.lifted.Query[_, _, Seq] = null
+      if (path == "/") {
+        source = homeCall(path, lang)
+      } else {
+        source = routeCall(path, path.substring(1, path.length), lang)
+      }
+
+      val route = source.take(1).ToRef[C].headOption
+      if (route.isDefined) {
+        guard.Data = route.get.ToJson
+      } else {
+        source = errorCall("not-found", lang)
+        val error = source.take(1).ToRef[C].headOption
+        if (error.isDefined) {
+          guard.Error = error.get.ToJson
+        }
+      }
+
+      Results.Ok(guard.ToJson)
+    } else {
+      Results.NotImplemented("Error: Not implemented")
+    }
   }
 }
