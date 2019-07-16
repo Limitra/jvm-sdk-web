@@ -119,11 +119,15 @@ final class RequestExtender[A](request: Request[A]) {
   def ToRouteGuard[C](db: DbSource)
                      (homeCall: (String, Option[String]) => Query[_, _, Seq])
                      (routeCall: (String, String, Option[String]) => Query[_, _, Seq])
-                     (errorCall: (String, Option[String]) => Query[_, _, Seq])(implicit tag: ClassTag[C], wr: Writes[C]) = {
+                     (errorCall: (String, Option[String]) => Query[_, _, Seq])
+                     (authCall: (String) => Query[_, _, Seq] = null)(implicit tag: ClassTag[C], wr: Writes[C]) = {
     import db._
 
     val path = request.queryString.get("path").filter(x => !x.isEmpty).map(x => x.head).headOption.getOrElse("")
     val lang = request.queryString.get("lang").filter(x => !x.isEmpty).map(x => x.head).headOption
+
+    val e401 = request.queryString.get("e401").filter(x => !x.isEmpty).map(x => x.head).headOption.getOrElse("401")
+    val e404 = request.queryString.get("e404").filter(x => !x.isEmpty).map(x => x.head).headOption.getOrElse("404")
 
     val guard = new RouteGuard()
 
@@ -137,9 +141,22 @@ final class RequestExtender[A](request: Request[A]) {
 
       val route = source.take(1).ToRef[C].headOption
       if (route.isDefined) {
-        guard.Data = route.get.ToJson
+        var hasAuth = false
+        if (authCall != null) {
+          hasAuth = (authCall(path).length > 0).result.Save
+        } else { hasAuth = true }
+
+        if (hasAuth) {
+          guard.Data = route.get.ToJson
+        } else {
+          source = errorCall(e401, lang)
+          val error = source.take(1).ToRef[C].headOption
+          if (error.isDefined) {
+            guard.Error = error.get.ToJson
+          }
+        }
       } else {
-        source = errorCall("not-found", lang)
+        source = errorCall(e404, lang)
         val error = source.take(1).ToRef[C].headOption
         if (error.isDefined) {
           guard.Error = error.get.ToJson
