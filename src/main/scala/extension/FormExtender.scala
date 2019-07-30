@@ -4,23 +4,28 @@ import com.limitra.sdk.core._
 import com.limitra.sdk.web._
 import com.limitra.sdk.web.definition._
 import play.api.data.Form
+import play.api.libs.json.{JsValue, Json}
 import play.api.mvc.{Request, Result, Results}
+
+import scala.io.Source
 
 /**
   * Extension methods for Form type.
   */
 final class FormExtender[A](value: Form[A]) {
-  private val _textConfig = Config("Response").Get("Text")
+  private val _response = Config("Text").OptionString("Response")
+  private val _lang = Config("Culture").String("Lang")
+  private val _text: JsValue = if(_response.isDefined) Json.parse(Source.fromFile(_response + "/" + _lang).getLines.mkString) else null
 
   private def _defSuccess(text: String): JsonResult = {
     return new JsonResult {
-      ResponseText = if (text == null || text.isEmpty) _textConfig.OptionString("Ok").getOrElse("Empty") else text
+      ResponseText = if (text == null || text.isEmpty) (if(_text != null) (_text \ "Ok").as[String] else "-") else text
     }
   }
 
   private def _defError(text: String): JsonResult = {
     return new JsonResult {
-      ResponseText = if (text == null || text.isEmpty) _textConfig.OptionString("BadRequest").getOrElse("Empty") else text
+      ResponseText = if (text == null || text.isEmpty) (if(_text != null) (_text \ "BadRequest").as[String] else "-") else text
     }
   }
 

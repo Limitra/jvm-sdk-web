@@ -18,6 +18,10 @@ final class RequestExtender[A](request: Request[A]) {
     request.domain
   }
 
+  def GetIds: Seq[Long] = {
+    return request.queryString.get("ids").map(x => x.flatMap(y => Try(y.toLong).toOption)).getOrElse(Seq())
+  }
+
   def ToDataTable[C](db: DbSource, query: Query[_, _, Seq])
                     (searchCall: (String) => Query[_, _, Seq] = null)
                     (sortCall: (DataTableSort) => Query[_, _, Seq] = null)
