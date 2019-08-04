@@ -22,18 +22,12 @@ sealed class ResponseProvider(lang: Option[String]) {
   private val _text: JsValue = if(_response.isDefined && _path.isDefined) Json.parse(Source.fromFile(_path.get + "/" + _response.get + "/" + _lang + ".json").getLines.mkString) else null
 
   def Read(key: String): String = {
-    var text: Option[String] = None
-    if (lang.isDefined) {
-      text = if(_text != null) (_text \ key).asOpt[String] else None
-    }
+    val text = if(_text != null) (_text \ key).asOpt[String] else None
     return text.getOrElse("-")
   }
 
   def ReadOption(key: String): Option[String] = {
-    var text: Option[String] = None
-    if (lang.isDefined) {
-      text = if(_text != null) (_text \ key).asOpt[String] else None
-    }
+    val text = if(_text != null) (_text \ key).asOpt[String] else None
     return text
   }
 }
