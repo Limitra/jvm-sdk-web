@@ -20,7 +20,7 @@ package object web {
   def Response(implicit request: Request[_]): ResponseProvider = new ResponseProvider(request.Language)
   def Dictionary(implicit request: Request[_]): DictionaryProvider = new DictionaryProvider(request.Language)
 
-  implicit def LongExt(value: Long)(implicit request: Request[_]) = new LongExtender(request.Language, value)
+  implicit def LongExt(value: Long)(implicit request: Request[_]) = new LongExtender(request.TimeZone, value)
 
   implicit def BigDecimalExt(value: BigDecimal)(implicit request: Request[_]) = new BigDecimalExtender(request.Language, value)
 }

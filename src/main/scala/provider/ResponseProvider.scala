@@ -13,19 +13,20 @@ import scala.io.Source
 sealed class ResponseProvider(lang: Option[String]) {
   private val _app = Config("Application")
   private val _path = _app.OptionString("Root")
+  private val _culture = _app.Get("Culture")
   private val _response = _app.Get("Text").OptionString("Response")
   private var _lang = lang.getOrElse("")
   if (!new File(_path.get + "/" + _response + "/" + _lang).exists()) {
-    _lang = _app.OptionString("DefaultLang").getOrElse("en-US")
+    _lang = _culture.OptionString("DefaultLang").getOrElse("en-US")
   }
-  private val _text: JsValue = if(_response.isDefined && _path.isDefined) Json.parse(Source.fromFile(_path.get + "/" + _response + "/" + _lang).getLines.mkString) else null
+  private val _text: JsValue = if(_response.isDefined && _path.isDefined) Json.parse(Source.fromFile(_path.get + "/" + _response.get + "/" + _lang + ".json").getLines.mkString) else null
 
   def Read(key: String): String = {
     var text: Option[String] = None
     if (lang.isDefined) {
       text = if(_text != null) (_text \ key).asOpt[String] else None
     }
-    text.getOrElse("-")
+    return text.getOrElse("-")
   }
 
   def ReadOption(key: String): Option[String] = {
