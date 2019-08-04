@@ -15,8 +15,6 @@ import scala.util.Try
   * Extension methods for Request type.
   */
 final class RequestExtender[A](request: Request[A]) {
-  private val _response = Response(request)
-
   def ToBody: String = {
     request.domain
   }
@@ -37,8 +35,8 @@ final class RequestExtender[A](request: Request[A]) {
     val result = new JsonResult {
       Notification = new JsonResultNotify {
         Status = NotifyStatus.Success;
-        Title = _response.Read("Title");
-        Message = _response.Read("Ok")
+        Title = Response(request).Read("Title");
+        Message = Response(request).Read("Ok")
       }
     }
     call(result)
