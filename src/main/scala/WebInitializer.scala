@@ -11,13 +11,14 @@ import play.api.mvc.Request
 package object web {
   implicit def RequestExt[A](value: Request[A]) = new RequestExtender[A](value)
 
-  implicit def FormExt[A](value: Form[A])(implicit request: Request[A]) = new FormExtender[A](value)(request)
+  implicit def FormExt[A](value: Form[A])(implicit request: Request[_]) = new FormExtender[A](value)(request)
 
   implicit def SingleClassExt[A](value: A)(implicit wr: Writes[A]) = new SingleClassExtender[A](value)
 
   def DateTime(implicit request: Request[_]) = new df.DateTime(request.TimeZone)
 
   def Response(implicit request: Request[_]): ResponseProvider = new ResponseProvider(request.Language)
+  def Dictionary(implicit request: Request[_]): DictionaryProvider = new DictionaryProvider(request.Language)
 
   implicit def LongExt(value: Long)(implicit request: Request[_]) = new LongExtender(request.Language, value)
 

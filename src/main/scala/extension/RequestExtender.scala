@@ -2,9 +2,10 @@ package com.limitra.sdk.web.extension
 
 import com.limitra.sdk.database.mysql.DbSource
 import com.limitra.sdk.web._
-import com.limitra.sdk.web.definition.{DataTable, DataTableFilter, DataTableSort, RouteGuard, SelectInput}
+import com.limitra.sdk.web.definition.{DataTable, DataTableFilter, DataTableSort, JsonResult, JsonResultNotify, RouteGuard, SelectInput}
 import play.api.libs.json.Writes
-import play.api.mvc.{Request, Results}
+import play.api.mvc.Results.Status
+import play.api.mvc.{Request, Result, Results}
 import slick.lifted.Query
 
 import scala.reflect.ClassTag
@@ -14,12 +15,33 @@ import scala.util.Try
   * Extension methods for Request type.
   */
 final class RequestExtender[A](request: Request[A]) {
+  private val _response = Response(request)
+
   def ToBody: String = {
     request.domain
   }
 
-  def GetIds: Seq[Long] = {
+  def Identities: Seq[Long] = {
     return request.queryString.get("ids").map(x => x.flatMap(y => Try(y.toLong).toOption)).getOrElse(Seq())
+  }
+
+  def Language: Option[String] = {
+    return request.headers.get("Language")
+  }
+
+  def TimeZone: Option[Int] = {
+    return request.headers.get("TimeZone").map(x => x.toInt)
+  }
+
+  def ToJsonResult(call: (JsonResult) => Result) = {
+    val result = new JsonResult {
+      Notification = new JsonResultNotify {
+        Status = NotifyStatus.Success;
+        Title = _response.Read("Title");
+        Message = _response.Read("Ok")
+      }
+    }
+    call(result)
   }
 
   def ToDataTable[C](db: DbSource, query: Query[_, _, Seq])
