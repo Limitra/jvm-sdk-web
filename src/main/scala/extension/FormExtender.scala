@@ -33,7 +33,7 @@ final class FormExtender[A](value: Form[A])(implicit request: Request[_]) {
     value.bindFromRequest.fold(
       error => {
         val result = this._defError
-        if (error != null) {
+        if (errCall != null) {
           errCall(error, result)
         }
         Results.BadRequest(result.ToJson)
