@@ -9,14 +9,12 @@ import play.api.mvc.{Request, Result, Results}
   * Extension methods for Form type.
   */
 final class FormExtender[A](value: Form[A])(implicit request: Request[_]) {
-  private val _response = Response(request)
-
   private def _defSuccess: JsonResult = {
     return new JsonResult {
       Notification = new JsonResultNotify {
         Status = NotifyStatus.Success;
-        Title = _response.Read("Title");
-        Message = _response.Read("Ok")
+        Title = Response(request).Read("Title");
+        Message = Response(request).Read("Ok")
       }
     }
   }
@@ -25,8 +23,8 @@ final class FormExtender[A](value: Form[A])(implicit request: Request[_]) {
     return new JsonResult {
       Notification = new JsonResultNotify {
         Status = NotifyStatus.Danger;
-        Title = _response.Read("Title");
-        Message = _response.Read("BadRequest")
+        Title = Response(request).Read("Title");
+        Message = Response(request).Read("BadRequest")
       }
     }
   }
