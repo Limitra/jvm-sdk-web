@@ -1,62 +1,47 @@
 package com.limitra.sdk.web.extension
 
-import com.limitra.sdk.core._
 import com.limitra.sdk.web._
 import com.limitra.sdk.web.definition._
 import play.api.data.Form
-import play.api.libs.json.{JsValue, Json}
 import play.api.mvc.{Request, Result, Results}
-
-import scala.io.Source
 
 /**
   * Extension methods for Form type.
   */
-final class FormExtender[A](value: Form[A])(implicit request: Request[A]) {
-  private def _defSuccess(formType: String): JsonResult = {
+final class FormExtender[A](value: Form[A])(implicit request: Request[_]) {
+  private val _response = Response(request)
+
+  private def _defSuccess: JsonResult = {
     return new JsonResult {
       Notification = new JsonResultNotify {
-        Title = Response(request).Read(formType + "Title");
-        Message = Response(request).Read("Ok")
+        Status = NotifyStatus.Success;
+        Title = _response.Read("Title");
+        Message = _response.Read("Ok")
       }
     }
   }
 
-  private def _defError(formType: String): JsonResult = {
+  private def _defError: JsonResult = {
     return new JsonResult {
       Notification = new JsonResultNotify {
-        Title = Response(request).Read(formType + "Title");
-        Message = Response(request).Read("BadRequest")
+        Status = NotifyStatus.Danger;
+        Title = _response.Read("Title");
+        Message = _response.Read("BadRequest")
       }
     }
   }
 
-  def Post[B](call: (A) => Result, errCall: (Form[A]) => Result = null)(implicit request: Request[B]) = {
+  def Init[B](call: (A, JsonResult) => Result, errCall: (Form[A], JsonResult) => Unit = null)(implicit request: Request[B]) = {
     value.bindFromRequest.fold(
       error => {
+        val result = this._defError
         if (error != null) {
-          errCall(error)
-        } else {
-          Results.BadRequest(this._defError("Post").ToJson)
+          errCall(error, result)
         }
+        Results.BadRequest(result.ToJson)
       },
       form => {
-        call(form)
-      }
-    )
-  }
-
-  def Put[B](call: (A) => Result, errCall: (Form[A]) => Result = null)(implicit request: Request[B]) = {
-    value.bindFromRequest.fold(
-      error => {
-        if (error != null) {
-          errCall(error)
-        } else {
-          Results.BadRequest(this._defError("Put").ToJson)
-        }
-      },
-      form => {
-        call(form)
+        call(form, this._defSuccess)
       }
     )
   }

@@ -14,7 +14,7 @@ import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
 abstract class AbstractFileController(cc: ControllerComponents, ca: DefaultActionBuilder)(implicit ec: ExecutionContext) extends AbstractController(cc) {
-  private val _config = Config("File")
+  private val _config = Config("Application").Get("File")
   private val _maxLen = 5242880
 
   private var _imageTypes = this._config.Get("Image").OptionString("Pattern").getOrElse("image/png,image/jpeg,image/bmp,image/gif").trim.split(',')

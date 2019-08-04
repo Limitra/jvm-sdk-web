@@ -11,7 +11,7 @@ import scala.concurrent.ExecutionContext
 import scala.concurrent.duration._
 
 class FileStorageTask @Inject()(actorSystem: ActorSystem)(implicit executionContext: ExecutionContext) {
-  private val _config = Config("File")
+  private val _config = Config("Application").Get("File")
 
   actorSystem.scheduler.schedule(initialDelay = 10.seconds, interval = 10.seconds) {
     val source = this._config.OptionString("Path")
