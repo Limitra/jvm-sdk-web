@@ -28,11 +28,11 @@ sealed class ResponseProvider(lang: Option[String]) {
     text.getOrElse("-")
   }
 
-  def Exists(key: String): Boolean = {
+  def ReadOption(key: String): Option[String] = {
     var text: Option[String] = None
     if (lang.isDefined) {
       text = if(_text != null) (_text \ key).asOpt[String] else None
     }
-    return text.isDefined
+    return text
   }
 }
