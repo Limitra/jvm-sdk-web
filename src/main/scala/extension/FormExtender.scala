@@ -29,7 +29,7 @@ final class FormExtender[A](value: Form[A])(implicit request: Request[_]) {
     }
   }
 
-  def Init[B](call: (A, JsonResult) => Result, errCall: (Form[A], JsonResult) => Unit = null)(implicit request: Request[B]) = {
+  def ToJsonResult[B](call: (A, JsonResult) => Result, errCall: (Form[A], JsonResult) => Unit = null)(implicit request: Request[B]) = {
     value.bindFromRequest.fold(
       error => {
         val result = this._defError
