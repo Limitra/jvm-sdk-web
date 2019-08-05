@@ -90,7 +90,7 @@ final class RequestExtender[A](request: Request[A]) {
     }
 
     if(sortCall != null) {
-      dataTable.Sort.foreach(sort => {
+      dataTable.Sort.reverse.foreach(sort => {
         source = sortCall(sort)
       })
     }
