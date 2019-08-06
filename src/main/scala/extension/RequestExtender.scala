@@ -65,6 +65,10 @@ final class RequestExtender[A](request: Request[A]) {
     }
 
     dataTable.Page.Number = request.queryString.get("page").flatMap(x => x.flatMap(y => Try(y.toLong).toOption).headOption).getOrElse(1.toLong)
+    if (dataTable.Page.Number < 1) {
+      dataTable.Page.Number = 1
+    }
+
     dataTable.Sort = request.queryString.get("sort").map(x => x.map(y => {
       val dtSort = new DataTableSort
       if (y.contains(",")) {
@@ -76,6 +80,9 @@ final class RequestExtender[A](request: Request[A]) {
     })).getOrElse(Seq())
 
     dataTable.Page.Length = request.queryString.get("length").flatMap(x => x.flatMap(y => Try(y.toLong).toOption).headOption).getOrElse(1.toLong)
+    if (dataTable.Page.Length < 1) {
+      dataTable.Page.Length = 1
+    }
 
     var source = query
 
