@@ -16,7 +16,7 @@ sealed class JwtProvider {
 
   def CreateToken(id: Long, password: String, expire: Long, detail: String = ""): String = {
     var payLoad = JwtClaimsSet(Map("id" -> id, "expire" -> expire, "roles" -> Seq(password, detail)))
-    JsonWebToken(_header, payLoad, _secret)
+    this._prefix + " " +JsonWebToken(_header, payLoad, _secret)
   }
 
   def ReadToken(jwt: String): JWT = {
@@ -45,7 +45,7 @@ sealed class JwtProvider {
       val roles = (claimsVal \ "roles").as[Seq[String]]
       jwtT.Password = roles.head
       jwtT.Detail = roles.last
-      jwtT.IsValid = this._validateToken(jwt) && jwtT.Expire >= DateTime.Now().getMillis
+      jwtT.IsValid = this._validateToken(jwt) && jwtT.Expire >= DateTime.now.getMillis
     }
     jwtT
   }
