@@ -24,11 +24,11 @@ final class RequestExtender[A](request: Request[A]) {
   }
 
   def Language: Option[String] = {
-    return request.headers.get("X-Language")
+    return request.headers.get("Language")
   }
 
   def TimeZone: Option[Int] = {
-    return request.headers.get("X-TimeZone").map(x => x.toInt)
+    return request.headers.get("TimeZone").map(x => x.toInt)
   }
 
   def ToJsonResult(call: (JsonResult) => Result) = {
