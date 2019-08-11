@@ -2,9 +2,8 @@ package com.limitra.sdk.web.extension
 
 import com.limitra.sdk.database.mysql.DbSource
 import com.limitra.sdk.web._
-import com.limitra.sdk.web.definition.{DataTable, DataTableFilter, DataTableSort, JsonResult, JsonResultNotify, RouteGuard, SelectInput}
+import com.limitra.sdk.web.definition.{DataTable, DataTableFilter, DataTableSort, JsonResult, JsonResultNotify, JsonWebToken, RouteGuard, SelectInput}
 import play.api.libs.json.Writes
-import play.api.mvc.Results.Status
 import play.api.mvc.{Request, Result, Results}
 import slick.lifted.Query
 
@@ -40,6 +39,15 @@ final class RequestExtender[A](request: Request[A]) {
       }
     }
     call(result)
+  }
+
+  def ToJwt: JsonWebToken =  {
+    val jwtT = JsonWebToken()
+    val header = request.headers.get("Authorization")
+    if (header.isDefined && !header.isEmpty) {
+      return Jwt.ReadToken(header.get)
+    }
+    return jwtT
   }
 
   def ToDataTable[C](db: DbSource, query: Query[_, _, Seq])
