@@ -20,6 +20,7 @@ package object web {
   def Response(implicit request: Request[_]): ResponseProvider = new ResponseProvider(request.Language)
   def Dictionary(implicit request: Request[_]): DictionaryProvider = new DictionaryProvider(request.Language)
   def Route: RouteProvider = new RouteProvider()
+  def Jwt: JwtProvider = new JwtProvider()
 
   implicit def LongExt(value: Long)(implicit request: Request[_]) = new LongExtender(request.TimeZone, value)
 
