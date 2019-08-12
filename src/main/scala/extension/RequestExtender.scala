@@ -41,13 +41,12 @@ final class RequestExtender[A](request: Request[A]) {
     call(result)
   }
 
-  def ToJwt: JsonWebToken =  {
-    val jwtT = JsonWebToken()
+  def ToJwt: Option[JsonWebToken] =  {
     val header = request.headers.get("Authorization")
     if (header.isDefined && !header.isEmpty) {
       return Jwt.ReadToken(header.get)
     }
-    return jwtT
+    return None
   }
 
   def ToDataTable[C](db: DbSource, query: Query[_, _, Seq])
