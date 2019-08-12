@@ -12,19 +12,7 @@ case class JsonResultNotify(var Title: String = "",
                             var Top: Option[Int] = None,
                             var Right: Option[Int] = None,
                             var Bottom: Option[Int] = None,
-                            var Left: Option[Int] = None) {
-  def SetTitle(title: String)(implicit request: Request[_]): Unit = {
-    this.Title = Response.Read(title);
-  }
-
-  def SetStatus(status: String)(implicit request: Request[_]): Unit = {
-    this.Status = Response.Read(status);
-  }
-
-  def SetMessage(message: String)(implicit request: Request[_]): Unit = {
-    this.Message = Response.Read(message);
-  }
-}
+                            var Left: Option[Int] = None)
 
 object JsonResultNotify {
   implicit val writes = Json.writes[JsonResultNotify]
