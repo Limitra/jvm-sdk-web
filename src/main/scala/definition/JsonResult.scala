@@ -12,9 +12,15 @@ case class JsonResult(var Status: Option[Int] = None,
     this.Text = Response.ReadOption(message);
   }
 
-  def SetTitle(title: String)(implicit request: Request[_]): Unit = {
+  def SetTitleN(title: String)(implicit request: Request[_]): Unit = {
     if (this.Notification.isDefined) {
       this.Notification.get.Title = Response.Read(title);
+    }
+  }
+
+  def SetStatus(status: String)(implicit request: Request[_]): Unit = {
+    if (this.Notification.isDefined) {
+      this.Notification.get.Status = status;
     }
   }
 
