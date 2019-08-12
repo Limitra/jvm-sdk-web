@@ -32,11 +32,11 @@ final class RequestExtender[A](request: Request[A]) {
 
   def ToJsonResult(call: (JsonResult) => Result) = {
     val result = new JsonResult {
-      Notification = new JsonResultNotify {
+      Notification = Some(new JsonResultNotify {
         Status = NotifyStatus.Success;
         Title = Response(request).Read("Title");
         Message = Response(request).Read("Ok")
-      }
+      })
     }
     call(result)
   }
