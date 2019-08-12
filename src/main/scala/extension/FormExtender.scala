@@ -11,21 +11,21 @@ import play.api.mvc.{Request, Result, Results}
 final class FormExtender[A](value: Form[A])(implicit request: Request[_]) {
   private def _defSuccess: JsonResult = {
     return new JsonResult {
-      Notification = new JsonResultNotify {
+      Notification = Some(new JsonResultNotify {
         Status = NotifyStatus.Success;
         Title = Response(request).Read("Title");
         Message = Response(request).Read("Ok")
-      }
+      })
     }
   }
 
   private def _defError: JsonResult = {
     return new JsonResult {
-      Notification = new JsonResultNotify {
+      Notification = Some(new JsonResultNotify {
         Status = NotifyStatus.Danger;
         Title = Response(request).Read("Title");
         Message = Response(request).Read("BadRequest")
-      }
+      })
     }
   }
 
