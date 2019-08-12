@@ -16,16 +16,16 @@ sealed class JwtProvider {
 
   def CreateToken(id: Long, password: String, expire: Long, detail: String = ""): String = {
     var payLoad = JwtClaimsSet(Map("id" -> id, "expire" -> expire, "roles" -> Seq(password, detail)))
-    this._prefix + " " +JsonWebToken(_header, payLoad, _secret)
+    this._prefix + " " + JsonWebToken(_header, payLoad, _secret)
   }
 
-  def ReadToken(jwt: String): JWT = {
-    var jwtT = JWT()
+  def ReadToken(jwt: String): Option[JWT] = {
     val token = this._extractToken(jwt)
     if (token.isDefined) {
-      jwtT = this._getJwtClaims(token.get)
+      return Some(this._getJwtClaims(token.get))
+    } else {
+      return None
     }
-    jwtT
   }
 
   private def _extractToken(authHeader: String): Option[String] = {
