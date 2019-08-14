@@ -34,7 +34,7 @@ abstract class AbstractFileController(cc: ControllerComponents, ca: ActionBuilde
   _documentTypes = _documentTypes ++ this._config.Get("Document").OptionString("Include").getOrElse("").trim.split(',')
   _documentTypes = _documentTypes.filter(x => !this._config.Get("Document").OptionString("Exclude").getOrElse("").trim.split(',').contains(x))
 
-  def Source(path: String) = Action.async { implicit request =>
+  def Download(path: String) = Action.async { implicit request =>
     val opType = request.queryString.get("type").filter(x => !x.isEmpty).map(x => x.head).headOption.getOrElse("")
     val source = this._config.OptionString("Path")
     if (source.isDefined) {
