@@ -13,7 +13,7 @@ import play.api.mvc._
 import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
-abstract class AbstractFileController(cc: ControllerComponents, ca: DefaultActionBuilder)(implicit ec: ExecutionContext) extends AbstractController(cc) {
+abstract class AbstractFileController(cc: ControllerComponents, ca: ActionBuilder[Request, AnyContent])(implicit ec: ExecutionContext) extends AbstractController(cc) {
   private val _config = Config("Application").Get("File")
   private val _maxLen = 5242880
 
