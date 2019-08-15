@@ -20,6 +20,7 @@ sealed class Authorization(parser: BodyParser[AnyContent], db: DbSource, query: 
     val unauthorized = () => {
       jresult.Status = Some(401)
       jresult.SetText("Unauthorized")(request)
+      jresult.SetStatus(NotifyStatus.Danger)(request)
       jresult.SetTitle("Title")(request)
       jresult.SetMessage("Unauthorized")(request)
       Future.successful(Results.Unauthorized(jresult.ToJson))
