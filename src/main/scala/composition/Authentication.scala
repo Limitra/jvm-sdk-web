@@ -17,17 +17,17 @@ sealed class Authentication(parser: BodyParser[AnyContent], db: DbSource, query:
                               block: (Request[A]) => Future[Result]) = {
     val jwt = request.ToJwt
 
-    val unauthorized = () => {
-      jresult.Status = Some(401)
-      jresult.SetText("Unauthorized")(request)
-      Future.successful(Results.Unauthorized(jresult.ToJson))
+    val forbidden = () => {
+      jresult.Status = Some(403)
+      jresult.SetText("Forbidden")(request)
+      Future.successful(Results.Forbidden(jresult.ToJson))
     }
 
     if (jwt.isDefined && jwt.get.IsValid) {
       val valid = this.query(jwt.get).result.Save
       if (valid) {
         block(request)
-      } else { unauthorized() }
-    } else { unauthorized() }
+      } else { forbidden() }
+    } else { forbidden() }
   }
 }
