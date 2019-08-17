@@ -32,9 +32,9 @@ sealed class Authorization(parser: BodyParser[AnyContent], db: DbSource, query: 
       routes.foreach(route => {
         var uri = ""
         route.split('/').foreach(partial => {
-          uri = uri + (if (partial.contains(":")) "/*." else "/" + partial)
+          uri = uri + (if (partial.contains(":")) "/*.*" else "/" + partial)
         })
-        uri = uri.replace("//", "/")
+        uri = uri.replace("//", "/").replace("/", """\/""")
         if (request.path.matches(uri)) {
           valid = true
         }
