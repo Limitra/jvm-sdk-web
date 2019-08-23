@@ -22,6 +22,7 @@ package object web {
   def Route: RouteProvider = new RouteProvider()
   def Jwt: JwtProvider = new JwtProvider()
   def File: FileProvider = new FileProvider()
+  def Image: ImageProvider = new ImageProvider()
 
   implicit def LongExt(value: Long)(implicit request: Request[_]) = new LongExtender(request.TimeZone, value)
 
