@@ -30,6 +30,17 @@ sealed class FileProvider {
     }
   }
 
+  def Size(path: String): Long = {
+    val source = this._config.OptionString("Path")
+    if (source.isDefined) {
+      val map = (source.get + "/" + path).replace("//", "/")
+      val file = new java.io.File(map)
+      if (file.exists()) {
+        file.length
+      } else { 0 }
+    } else { 0 }
+  }
+
   def Delete(path: String): Boolean = {
     val source = this._config.OptionString("Path")
     if (source.isDefined) {
