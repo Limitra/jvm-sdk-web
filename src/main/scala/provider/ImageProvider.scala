@@ -18,16 +18,16 @@ sealed class ImageProvider {
     if (source.isDefined) {
       var map = (source.get + "/" + path).replace("//", "/")
       val file = new java.io.File(map)
+      var newPath = path
       if (file.exists()) {
-        if (ride && map.contains(".")) {
-          val partials = map.split('.')
-          if (partials.length == 2) {
-            map = partials(0) + "_" + width.toString + "x" + height.toString + "." + partials(1)
-          }
+        if (!ride && path.contains(".")) {
+          val partials = path.split('.')
+          newPath = path.replace("." + partials.last, "") + "_" + width.toString + "x" + height.toString + "." + partials.last
         }
+        map = (source.get + "/" + newPath).replace("//", "/")
         Image.fromFile(file).fit(width, height, Color.Black).output(new File(map))
         if (new File(map).exists()) {
-          Some(map)
+          Some(newPath)
         } else { None }
       } else { None }
     } else { None }
