@@ -18,7 +18,7 @@ sealed class DictionaryProvider(lang: Option[String]) {
   if (!new File(_path.get + "/" + _response + "/" + _lang).exists()) {
     _lang = _app.OptionString("DefaultLang").getOrElse("en-US")
   }
-  private val _text: JsValue = if(_response.isDefined && _path.isDefined) Json.parse(Source.fromFile(_path.get + "/" + _response + "/" + _lang).getLines.mkString) else null
+  private val _text: JsValue = if(_response.isDefined && _path.isDefined) Json.parse(Source.fromFile(_path.get + "/" + _response.get + "/" + _lang).getLines.mkString) else null
 
   def Read(key: String): String = {
     var text: Option[String] = None
