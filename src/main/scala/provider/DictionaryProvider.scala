@@ -20,7 +20,7 @@ sealed class DictionaryProvider(lang: Option[String]) {
   }
   private val _text: JsValue = if(_response.isDefined && _path.isDefined) Json.parse(Source.fromFile(_path.get + "/" + _response.get + "/" + _lang).getLines.mkString) else null
 
-  def Lang: String = {
+  def Language: String = {
     return _lang
   }
 
