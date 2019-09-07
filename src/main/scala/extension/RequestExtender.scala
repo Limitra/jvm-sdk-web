@@ -18,6 +18,14 @@ final class RequestExtender[A](request: Request[A]) {
     request.domain
   }
 
+  def RemoteAddress: String = {
+    request.headers.get("X-Forwarded-For").getOrElse(request.remoteAddress)
+  }
+
+  def Domain: String = {
+    return request.headers.get("X-Forwarded-Host").getOrElse("localhost")
+  }
+
   def Identities: Seq[Long] = {
     return request.queryString.get("ids").map(x => x.flatMap(y => Try(y.toLong).toOption)).getOrElse(Seq())
   }
