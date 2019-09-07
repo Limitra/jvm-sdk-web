@@ -22,7 +22,7 @@ final class RequestExtender[A](request: Request[A]) {
     request.headers.get("X-Forwarded-For").getOrElse(request.remoteAddress)
   }
 
-  def Domain: String = {
+  def Host: String = {
     return request.headers.get("X-Forwarded-Host").getOrElse("localhost")
   }
 
