@@ -36,6 +36,7 @@ final class RequestExtender[A](request: Request[A]) {
 
   def TimeZone: Option[Int] = {
     return request.headers.get("TimeZone").map(x => x.toInt)
+
   }
 
   def ToJsonResult(call: (JsonResult) => Result) = {
