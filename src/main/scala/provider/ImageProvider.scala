@@ -25,7 +25,8 @@ sealed class ImageProvider {
           newPath = path.replace("." + partials.last, "") + "_" + width.toString + "x" + height.toString + "." + partials.last
         }
         map = (source.get + "/" + newPath).replace("//", "/")
-        Image.fromFile(file).fit(width, height, Color.Black).output(new File(map))
+        val rgb = if (newPath.toLowerCase().contains("png")) Color.Transparent else Color.Black
+        Image.fromFile(file).fit(width, height, rgb).output(new File(map))
         if (new File(map).exists()) {
           Some(newPath)
         } else { None }
