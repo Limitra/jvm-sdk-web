@@ -4,6 +4,7 @@ import com.limitra.sdk.core.{definition => df}
 import com.limitra.sdk.core.extension._
 import com.limitra.sdk.web.extension._
 import com.limitra.sdk.web.provider._
+import org.joda.time.DateTime
 import play.api.data.Form
 import play.api.libs.json._
 import play.api.mvc.Request
@@ -27,4 +28,6 @@ package object web {
   implicit def LongExt(value: Long)(implicit request: Request[_]) = new LongExtender(request.TimeZone, value)
 
   implicit def BigDecimalExt(value: BigDecimal)(implicit request: Request[_]) = new BigDecimalExtender(request.Language, value)
+
+  implicit def DateTimeExt(value: DateTime)(implicit request: Request[_]) = new DateTimeExtender(request.Language, value)
 }
