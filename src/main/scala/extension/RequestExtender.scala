@@ -134,7 +134,8 @@ final class RequestExtender[A](request: Request[A]) {
   }
 
   def ToSelectInput[C](db: DbSource, query: Query[_, _, Seq])
-                    (searchCall: (String) => Query[_, _, Seq] = null)(implicit tag: ClassTag[C], wr: Writes[C]) = {
+                    (searchCall: (String) => Query[_, _, Seq] = null, sourceMap: (Seq[C]) => Seq[C] = null)
+                      (implicit tag: ClassTag[C], wr: Writes[C]) = {
     import db._
 
     val selectInput = new SelectInput
@@ -156,7 +157,11 @@ final class RequestExtender[A](request: Request[A]) {
       if(selectInput.Data.Length % selectInput.Page.Length > 0) countLen + 1 else countLen
     }
 
-    val refSource = source.drop(dropLen).take(selectInput.Page.Length).ToRef[C]
+    var refSource = source.drop(dropLen).take(selectInput.Page.Length).ToRef[C]
+    if (sourceMap != null) {
+      refSource = sourceMap(refSource)
+    }
+
     selectInput.Data.Source = refSource.ToJson
     selectInput.Page.Length = refSource.length
 
