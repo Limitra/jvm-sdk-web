@@ -4,6 +4,7 @@ import java.io.File
 
 import com.limitra.sdk.core.Config
 import com.limitra.sdk.web
+import com.sksamuel.scrimage.nio.{JpegWriter, PngWriter}
 import com.sksamuel.scrimage.{Color, Image}
 
 /**
@@ -25,7 +26,12 @@ sealed class ImageProvider {
           newPath = path.replace("." + partials.last, "") + "_" + width.toString + "x" + height.toString + "." + partials.last
         }
         map = (source.get + "/" + newPath).replace("//", "/")
-        val rgb = if (newPath.toLowerCase().contains("png")) Color.Transparent else Color.Black
+        val rgb = if (newPath.toLowerCase().endsWith("png")) Color.Transparent else Color.Black
+        implicit val writer = if (newPath.toLowerCase().endsWith("png")) {
+          PngWriter.MaxCompression
+        } else {
+          JpegWriter().withCompression(50).withProgressive(true)
+        }
         Image.fromFile(file).fit(width, height, rgb).output(new File(map))
         if (new File(map).exists()) {
           Some(newPath)
