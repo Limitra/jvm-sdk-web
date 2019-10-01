@@ -58,7 +58,7 @@ final class RequestExtender[A](request: Request[A]) {
     return None
   }
 
-  def ToDataTable[C](db: DbSource, query: Query[_, _, Seq])
+  def ToDataTable[C](db: DbSource, query: Query[_, _, Seq], sourceMap: (Seq[C]) => Seq[C] = null)
                     (searchCall: (String) => Query[_, _, Seq] = null)
                     (sortCall: (DataTableSort) => Query[_, _, Seq] = null)
                     (filterCall: (DataTableFilter) => Query[_, _, Seq] = null)(implicit tag: ClassTag[C], wr: Writes[C]) = {
@@ -126,7 +126,11 @@ final class RequestExtender[A](request: Request[A]) {
       if(dataTable.Data.Length % dataTable.Page.Length > 0) countLen + 1 else countLen
     }
 
-    val refSource = source.drop(dropLen).take(dataTable.Page.Length).ToRef[C]
+    var refSource = source.drop(dropLen).take(dataTable.Page.Length).ToRef[C]
+    if (sourceMap != null) {
+      refSource = sourceMap(refSource)
+    }
+
     dataTable.Data.Source = refSource.ToJson
     dataTable.Page.Length = refSource.length
 
