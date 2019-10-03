@@ -27,10 +27,10 @@ sealed class ImageProvider {
         }
         map = (source.get + "/" + newPath).replace("//", "/")
         val rgb = if (newPath.toLowerCase().endsWith("png")) Color.Transparent else Color.Black
-        implicit val writer = if (newPath.toLowerCase().endsWith("png")) {
-          PngWriter.MaxCompression
+        if (newPath.toLowerCase().endsWith("png")) {
+          implicit val writer = PngWriter.MaxCompression
         } else {
-          JpegWriter().withCompression(50).withProgressive(true)
+          implicit val writer = JpegWriter().withCompression(50)
         }
         Image.fromFile(file).fit(width, height, rgb).output(new File(map))
         if (new File(map).exists()) {
