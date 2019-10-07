@@ -44,17 +44,17 @@ sealed class ImageProvider {
     } else { None }
   }
 
-  def WriteText(path: String, text: String, compressForce: Boolean = false): Boolean = {
+  def WriteText(path: String, text: String, size: Int, compressForce: Boolean = false): Boolean = {
     web.File._init()
     val source = this._config.OptionString("Path")
     if (source.isDefined) {
       val map = (source.get + "/" + path).replace("//", "/")
       val file = new java.io.File(map)
       if (file.exists()) {
-        val font = new Font("Arial Black", Font.BOLD, 20)
+        val font = new Font("Arial Black", Font.BOLD, size)
         val bufferedImage = Image.fromFile(file).toNewBufferedImage()
         val graphics = bufferedImage.getGraphics
-        graphics.setColor(new java.awt.Color(255, 255, 255, 150))
+        graphics.setColor(new java.awt.Color(255, 255, 255, 90))
         graphics.setFont(font)
 
         val metrics = graphics.getFontMetrics(font)
