@@ -1,0 +1,18 @@
+organization := "com.limitra.sdk"
+organizationName := "Limitra R&D"
+homepage := Some(url("https://github.com/limitra/jvm-sdk-web"))
+scmInfo := Some(ScmInfo(url("https://github.com/limitra/jvm-sdk-web"), "git@github.com:limitra/jvm-sdk-web.git"))
+developers := List(Developer("mnevfel",
+    "Mustafa Nevfel",
+    "mnevfel@limitra.com",
+    url("https://github.com/mnevfel")))
+licenses += ("BSD-2-Clause", url("https://github.com/Limitra/jvm-sdk-web/blob/master/LICENSE.txt"))
+
+publishMavenStyle := true
+
+publishTo := Some(
+  if (isSnapshot.value)
+    Opts.resolver.sonatypeSnapshots
+  else
+    Opts.resolver.sonatypeStaging
+)
