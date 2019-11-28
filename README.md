@@ -18,7 +18,65 @@ Limitra JVM Sdk Web provides practical and optimized results by adapting server-
 Import Dependency
 =================
 
-* Usage documents will be published soon along with output version
+Apache Maven
+````Maven
+<dependency>
+  <groupId>com.limitra.sdk</groupId>
+  <artifactId>web_2.12.12</artifactId>
+  <version>0.0.1</version>
+</dependency>
+````
+
+Gradle Groovy DSL
+````Gradle Groovy DSL
+implementation 'com.limitra.sdk:web_2.12.12:0.0.1'
+````
+
+Gradle Kotlin DSL
+````Gradle Kotlin DSL
+compile("com.limitra.sdk:web_2.12.12:0.0.1")
+````
+
+Scala SBT
+````Scala SBT
+libraryDependencies += "com.limitra.sdk" %% "web_2.12.12" % "0.0.1"
+````
+
+Apache Ivy
+````Apache Ivy
+<dependency org="com.limitra.sdk" name="web_2.12.12" rev="0.0.1" />
+````
+
+Groovy Grape
+````Groovy Grape
+@Grapes(
+  @Grab(group='com.limitra.sdk', module='web_2.12.12', version='0.0.1')
+)
+````
+
+Leiningen
+````Leiningen
+[com.limitra.sdk/web_2.12.12 "0.0.1"]
+````
+
+Apache Buildr
+````Apache Buildr
+'com.limitra.sdk:web_2.12.12:jar:0.0.1'
+````
+
+PURL
+````PURL
+pkg:maven/com.limitra.sdk/web_2.12.12@0.0.1
+````
+
+Bazel
+````Bazel
+maven_jar(
+    name = "web_2.12.12",
+    artifact = "com.limitra.sdk:web_2.12.12:0.0.1",
+    sha1 = "1fc38353bb455e5f96b589dff288b11e110e3200",
+)
+````
 
 Extensions
 ==========

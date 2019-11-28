@@ -1,0 +1,21 @@
+import sbtassembly.AssemblyPlugin.autoImport.{MergeStrategy, assemblyMergeStrategy}
+
+assemblyExcludedJars in assembly := {
+  val libs = (fullClasspath in assembly).value
+  libs filter { lib =>
+    (lib.data.getName.contains("scala-") && !lib.data.getName.contains("scala-reflect"))
+  }
+}
+
+lazy val fatJar = project
+  .enablePlugins(AssemblyPlugin)
+  .settings(
+    skip in publish := true
+  )
+
+addArtifact(artifact in (Compile, assembly), assembly)
+
+assemblyMergeStrategy in assembly := {
+  case PathList("META-INF", xs @ _*) => MergeStrategy.discard
+  case x => MergeStrategy.first
+}
