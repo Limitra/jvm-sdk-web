@@ -74,7 +74,7 @@ Bazel
 maven_jar(
     name = "web_2.12.12",
     artifact = "com.limitra.sdk:web_2.12.12:0.0.1",
-    sha1 = "1fc38353bb455e5f96b589dff288b11e110e3200",
+    sha1 = "6d3e606a6b61ea9295884efa7bca40392f5b5f1e",
 )
 ````
 
