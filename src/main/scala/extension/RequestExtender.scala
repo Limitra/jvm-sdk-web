@@ -138,7 +138,7 @@ final class RequestExtender[A](request: Request[A]) {
   }
 
   def ToSelectInput[C](db: DbSource, query: Query[_, _, Seq])
-                    (searchCall: (String) => Query[_, _, Seq] = null, sourceMap: (Seq[C]) => Seq[C] = null)
+                      (searchCall: (String) => Query[_, _, Seq] = null, textCall: (Seq[Long]) => Query[_, _, Seq] = null, sourceMap: (Seq[C]) => Seq[C] = null)
                       (implicit tag: ClassTag[C], wr: Writes[C]) = {
     import db._
 
@@ -152,6 +152,11 @@ final class RequestExtender[A](request: Request[A]) {
     var source = query
     if(searchCall != null && selectInput.Search.isDefined) {
       source = searchCall(selectInput.Search.get)
+    }
+
+    val ids = request.queryString.get("ids").map(x => x.flatMap(y => Try(y.toLong).toOption)).getOrElse(Seq())
+    if(textCall != null && ids.length > 0) {
+      source = textCall(ids)
     }
 
     val dropLen = selectInput.Page.Length * (selectInput.Page.Number  - 1)
