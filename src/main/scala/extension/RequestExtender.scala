@@ -177,6 +177,44 @@ final class RequestExtender[A](request: Request[A]) {
     Results.Ok(selectInput.ToJson)
   }
 
+  def ToSelectInputOffline[C](query: Seq[C])
+                      (searchCall: (String) => Seq[C] = null, textCall: (Seq[Long]) => Seq[C] = null, sourceMap: (Seq[C]) => Seq[C] = null)
+                      (implicit tag: ClassTag[C], wr: Writes[C]) = {
+    val selectInput = new SelectInput
+
+    selectInput.Search = request.queryString.get("search").filter(x => !x.isEmpty).map(x => x.head).headOption
+    selectInput.Page.Number = request.queryString.get("page").flatMap(x => x.flatMap(y => Try(y.toLong).toOption).headOption).getOrElse(1.toLong)
+    selectInput.Page.Length = request.queryString.get("length").flatMap(x => x.flatMap(y => Try(y.toLong).toOption).headOption).getOrElse(1.toLong)
+    selectInput.Data.Values = request.queryString.get("values").map(x => x.flatMap(y => Try(y.toLong).toOption)).getOrElse(Seq())
+
+    var source = query
+    if(searchCall != null && selectInput.Search.isDefined) {
+      source = searchCall(selectInput.Search.get)
+    }
+
+    val ids = request.queryString.get("ids").map(x => x.flatMap(y => Try(y.toLong).toOption)).getOrElse(Seq())
+    if(textCall != null && ids.length > 0) {
+      source = textCall(ids)
+    }
+
+    val dropLen = selectInput.Page.Length * (selectInput.Page.Number  - 1)
+    val dataLen = source.length
+    val countLen = dataLen / selectInput.Page.Length
+    selectInput.Page.Count = if(countLen == 0) 1 else {
+      if(selectInput.Data.Length % selectInput.Page.Length > 0) countLen + 1 else countLen
+    }
+
+    var refSource = source.drop(dropLen.toInt).take(selectInput.Page.Length.toInt)
+    if (sourceMap != null) {
+      refSource = sourceMap(refSource)
+    }
+
+    selectInput.Data.Source = refSource.ToJson
+    selectInput.Page.Length = refSource.length
+
+    Results.Ok(selectInput.ToJson)
+  }
+
   def ToRouteGuard[C](db: DbSource)
                      (homeCall: (String, Option[String]) => Query[_, _, Seq])
                      (routeCall: (String, String, Option[String]) => Query[_, _, Seq])
