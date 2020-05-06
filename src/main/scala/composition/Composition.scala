@@ -10,7 +10,7 @@ import scala.concurrent.ExecutionContext
 
 abstract class AbstractComposition(parser: BodyParser[AnyContent])(implicit ec: ExecutionContext) extends ActionBuilderImpl(parser) {
   def Db: DbSource
-  def IsSecured(token: Option[String]): Boolean = { return false }
+  def IsSecured(token: Option[String]): Boolean = { return true }
   def IsAuthenticated(jwt: JsonWebToken): Rep[Boolean]
   def AuthorizedUrls(jwt: JsonWebToken): Query[_, String, Seq]
 
