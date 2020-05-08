@@ -1,6 +1,10 @@
 package com.limitra.sdk.web.definition
 
-case class DeviceInfo(var UserID: Option[Long] = None,
+case class RequestInfo(var Path: String = "",
+                      var RemoteAddress: String = "",
+                      var UserID: Option[Long] = None,
+                      var Header: Option[String] = None,
+                      var Body: Option[String] = None,
                       var UserAgent: Option[String] = None,
                       var OS: Option[String] = None,
                       var OSVersion: Option[String] = None,
