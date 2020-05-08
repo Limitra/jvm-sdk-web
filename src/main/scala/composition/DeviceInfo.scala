@@ -14,6 +14,9 @@ sealed class DeviceInfo(parser: BodyParser[AnyContent], info: (definition.Device
 
     val device = new definition.DeviceInfo
     device.UserAgent = request.headers.get("UserAgent")
+    if (!device.UserAgent.isDefined) {
+      device.UserAgent = request.headers.get("User-Agent")
+    }
     device.Browser = request.headers.get("Browser")
     device.BrowserVersion = request.headers.get("BrowserVersion")
     device.Device = request.headers.get("Device")
