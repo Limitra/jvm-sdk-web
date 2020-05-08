@@ -28,7 +28,7 @@ sealed class RequestInfo(parser: BodyParser[AnyContent], info: (definition.Reque
     reqInfo.Millis = DateTime(request).now.getMillis
     reqInfo.RemoteAddress = request.RemoteAddress
     reqInfo.Path = request.path
-    reqInfo.Header = Some(request.headers.toString)
+    reqInfo.Header = request.headers.headers.mkString(", ")
     reqInfo.Body = if (request.hasBody) Some(request.body.toString) else None
 
     if (jwt.isDefined) {
