@@ -1,4 +1,4 @@
-package com.limitra.sdk.web
+package com.limitra.sdk.web.definition
 
 case class RouteItem(
   var Type_Name: String = "",
