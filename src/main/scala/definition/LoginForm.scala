@@ -1,4 +1,4 @@
-package com.limitra.sdk.web
+package com.limitra.sdk.web.definition
 
 import play.api.data.Form
 import play.api.data.Forms._

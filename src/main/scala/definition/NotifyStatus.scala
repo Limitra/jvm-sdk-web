@@ -1,4 +1,4 @@
-package com.limitra.sdk.web
+package com.limitra.sdk.web.definition
 
 object NotifyStatus {
   val Success = "success"

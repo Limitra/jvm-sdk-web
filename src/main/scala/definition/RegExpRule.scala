@@ -1,4 +1,4 @@
-package com.limitra.sdk.web
+package com.limitra.sdk.web.definition
 
 object RegExpRule {
   val Number: String = """^[0-9]{1,7}$"""
