@@ -2,7 +2,7 @@ package com.limitra.sdk.web.extension
 
 import com.limitra.sdk.database.mysql.DbSource
 import com.limitra.sdk.web._
-import com.limitra.sdk.web.definition.{DataTable, DataTableFilter, DataTableSort, JsonResult, JsonResultNotify, JsonWebToken, RouteGuard, SelectInput}
+import com.limitra.sdk.web.definition.{DataTable, DataTableFilter, DataTableSort, JsonResult, JsonResultNotify, JsonWebToken, NotifyStatus, RouteGuard, SelectInput}
 import play.api.libs.json.Writes
 import play.api.mvc.{Request, Result, Results}
 import slick.lifted.Query
