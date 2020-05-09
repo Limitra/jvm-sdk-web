@@ -4,6 +4,7 @@ case class RequestInfo(
                         var Millis: Long = 0,
                         var Path: String = "",
                         var Host: String = "",
+                        var IsProduction: Boolean = false,
                         var RemoteAddress: String = "",
                         var Header: String = "",
                         var Body: Option[String] = None,
