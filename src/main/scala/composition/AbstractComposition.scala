@@ -20,14 +20,14 @@ abstract class AbstractComposition(parser: BodyParser[AnyContent])(implicit ec: 
   }
 
   def Secured: ActionBuilder[Request, AnyContent] = {
-    return new Security(parser, this.IsSecured)(ec)
+    return new Information(parser, this.Informed)(ec) andThen new Security(parser, this.IsSecured)(ec)
   }
 
   def Authenticated: ActionBuilder[Request, AnyContent] = {
-    return new Authentication(parser, this.Db, this.IsAuthenticated)(ec)
+    return new Information(parser, this.Informed)(ec) andThen new Authentication(parser, this.Db, this.IsAuthenticated)(ec)
   }
 
   def Authorized: ActionBuilder[Request, AnyContent] = {
-    return new Authentication(parser, this.Db, this.IsAuthenticated)(ec) andThen new Authorization(parser, this.Db, this.AuthorizedUrls)(ec)
+    return new Information(parser, this.Informed)(ec) andThen new Authentication(parser, this.Db, this.IsAuthenticated)(ec) andThen new Authorization(parser, this.Db, this.AuthorizedUrls)(ec)
   }
 }
