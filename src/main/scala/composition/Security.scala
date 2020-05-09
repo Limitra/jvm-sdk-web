@@ -33,7 +33,7 @@ sealed class Security(parser: BodyParser[AnyContent], check: (Option[String], de
     reqInfo.RemoteAddress = request.RemoteAddress
     reqInfo.Path = request.path
     reqInfo.Host = request.Host
-    reqInfo.IsProduction = request.Host.contains("localhost")
+    reqInfo.IsProduction = !request.Host.contains("localhost")
     reqInfo.Header = request.headers.headers.mkString(", ")
     reqInfo.Body = if (request.hasBody) Some(request.body.toString) else None
 
