@@ -27,6 +27,7 @@ sealed class Information(parser: BodyParser[AnyContent], info: (definition.Reque
     reqInfo.Millis = DateTime(request).now.getMillis
     reqInfo.RemoteAddress = request.RemoteAddress
     reqInfo.Path = request.path
+    reqInfo.Host = request.host
     reqInfo.Header = request.headers.headers.mkString(", ")
     reqInfo.Body = if (request.hasBody) Some(request.body.toString) else None
 
