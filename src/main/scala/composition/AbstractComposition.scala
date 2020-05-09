@@ -10,24 +10,24 @@ import scala.concurrent.ExecutionContext
 
 abstract class AbstractComposition(parser: BodyParser[AnyContent])(implicit ec: ExecutionContext) extends ActionBuilderImpl(parser) {
   def Db: DbSource
-  def Informed(info: definition.RequestInfo): Unit = () => {}
+  def GetInfo(info: definition.RequestInfo): Unit = () => {}
   def IsSecured(token: Option[String], info: definition.RequestInfo): Boolean = { return true }
   def IsAuthenticated(jwt: JsonWebToken): Rep[Boolean]
   def AuthorizedUrls(jwt: JsonWebToken): Query[_, String, Seq]
 
   def Informed: ActionBuilder[Request, AnyContent] = {
-    return new Information(parser, this.Informed)(ec)
+    return new Information(parser, this.GetInfo)(ec)
   }
 
   def Secured: ActionBuilder[Request, AnyContent] = {
-    return new Information(parser, this.Informed)(ec) andThen new Security(parser, this.IsSecured)(ec)
+    return new Information(parser, this.GetInfo)(ec) andThen new Security(parser, this.IsSecured)(ec)
   }
 
   def Authenticated: ActionBuilder[Request, AnyContent] = {
-    return new Information(parser, this.Informed)(ec) andThen new Authentication(parser, this.Db, this.IsAuthenticated)(ec)
+    return new Information(parser, this.GetInfo)(ec) andThen new Authentication(parser, this.Db, this.IsAuthenticated)(ec)
   }
 
   def Authorized: ActionBuilder[Request, AnyContent] = {
-    return new Information(parser, this.Informed)(ec) andThen new Authentication(parser, this.Db, this.IsAuthenticated)(ec) andThen new Authorization(parser, this.Db, this.AuthorizedUrls)(ec)
+    return new Information(parser, this.GetInfo)(ec) andThen new Authentication(parser, this.Db, this.IsAuthenticated)(ec) andThen new Authorization(parser, this.Db, this.AuthorizedUrls)(ec)
   }
 }
