@@ -33,7 +33,7 @@ class FileStorageTask @Inject()(actorSystem: ActorSystem)(implicit executionCont
   }
 
   private def _deleteFile(file: File) {
-    if (file.lastModified < DateTime.now.minusSeconds(30).getMillis) {
+    if (file.lastModified < DateTime.now.minusMinutes(30).getMillis) {
       file.delete()
     }
   }
