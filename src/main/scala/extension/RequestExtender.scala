@@ -2,10 +2,10 @@ package com.limitra.sdk.web.extension
 
 import com.limitra.sdk.database.mysql.DbSource
 import com.limitra.sdk.web._
-import com.limitra.sdk.web.definition.{DataTable, DataTableFilter, DataTableSort, JsonResult, JsonResultNotify, JsonWebToken, NotifyStatus, RouteGuard, SelectInput}
+import com.limitra.sdk.web.definition._
 import play.api.libs.json.{JsValue, Writes}
 import play.api.mvc.{Request, Result, Results}
-import slick.lifted.Query
+import slick.lifted.{MappedProjection, Query}
 
 import scala.concurrent.Future
 import scala.reflect.ClassTag
@@ -15,47 +15,88 @@ import scala.util.Try
   * Extension methods for Request type.
   */
 final class RequestExtender[A](request: Request[A]) {
-  private def toSelectInput[C](db: DbSource, query: Query[_, _, Seq])
-                              (searchCall: (String) => Query[_, _, Seq] = null, textCall: (Seq[Long]) => Query[_, _, Seq] = null, sourceMap: (Seq[C]) => Seq[C] = null)
-                              (implicit tag: ClassTag[C], wr: Writes[C]) = {
+  def ToDataTable[C, T, E](db: DbSource, query: Query[T, E, Seq])
+                                    (projection: (T) => MappedProjection[C, E], sourceMap: (Seq[C]) => Seq[C] = null)
+                                    (searchCall: (String) => Query[T, E, Seq] = null)
+                                    (sortCall: (DataTableSort) => Query[T, E, Seq] = null)
+                                    (filterCall: (DataTableFilter) => Query[T, E, Seq] = null)
+                   (implicit tag: ClassTag[C], wr: Writes[C]): JsValue = {
     import db._
+    val dataTable = new DataTable
+    dataTable.Search = request.queryString.get("search").filter(x => !x.isEmpty).map(x => x.head).headOption
 
-    val selectInput = new SelectInput
+    val keys = request.queryString.get("keys")
+    val values = request.queryString.get("values")
 
-    selectInput.Search = request.queryString.get("search").filter(x => !x.isEmpty).map(x => x.head).headOption
-    selectInput.Page.Number = request.queryString.get("page").flatMap(x => x.flatMap(y => Try(y.toLong).toOption).headOption).getOrElse(1.toLong)
-    selectInput.Page.Length = request.queryString.get("length").flatMap(x => x.flatMap(y => Try(y.toLong).toOption).headOption).getOrElse(1.toLong)
-    selectInput.Data.Values = request.queryString.get("values").map(x => x.flatMap(y => Try(y.toLong).toOption)).getOrElse(Seq())
+    if(keys.isDefined && values.isDefined) {
+      keys.get.foreach(key => {
+        val index = keys.get.indexOf(key)
+
+        val value = if(values.get.length > index) Some(values.get(index)) else None
+        if(value.isDefined) {
+          dataTable.Filter = dataTable.Filter :+ (new DataTableFilter() { Key = key; Value = value.get })
+        }
+      })
+    }
+
+    dataTable.Page.Number = request.queryString.get("page").flatMap(x => x.flatMap(y => Try(y.toLong).toOption).headOption).getOrElse(1.toLong)
+    if (dataTable.Page.Number < 1) {
+      dataTable.Page.Number = 1
+    }
+
+    dataTable.Sort = request.queryString.get("sort").map(x => x.map(y => {
+      val dtSort = new DataTableSort
+      if (y.contains(",")) {
+        val partials = y.split(',')
+        dtSort.Field = partials(0)
+        dtSort.Direction = partials(1)
+      }
+      dtSort
+    })).getOrElse(Seq())
+
+    dataTable.Page.Length = request.queryString.get("length").flatMap(x => x.flatMap(y => Try(y.toLong).toOption).headOption).getOrElse(1.toLong)
+    if (dataTable.Page.Length < 1) {
+      dataTable.Page.Length = 1
+    }
 
     var source = query
-    if(searchCall != null && selectInput.Search.isDefined) {
-      source = searchCall(selectInput.Search.get)
+
+    if(searchCall != null && dataTable.Search.isDefined) {
+      source = searchCall(dataTable.Search.get)
     }
 
-    val ids = request.queryString.get("ids").map(x => x.flatMap(y => Try(y.toLong).toOption)).getOrElse(Seq())
-    if(textCall != null && ids.length > 0) {
-      source = textCall(ids)
+    if(filterCall != null) {
+      dataTable.Filter.foreach(filter => {
+        source = filterCall(filter)
+      })
     }
 
-    val dropLen = selectInput.Page.Length * (selectInput.Page.Number  - 1)
-    val dataLen = source.CountVal
-    val countLen = dataLen / selectInput.Page.Length
-    selectInput.Page.Count = if(countLen == 0) 1 else {
-      if(selectInput.Data.Length % selectInput.Page.Length > 0) countLen + 1 else countLen
+    if(sortCall != null) {
+      dataTable.Sort.reverse.foreach(sort => {
+        source = sortCall(sort)
+      })
     }
 
-    var refSource = source.drop(dropLen).take(selectInput.Page.Length).ToRef[C]
+    dataTable.Data.Length = source.count.result.save
+
+    val dropLen = dataTable.Page.Length * (dataTable.Page.Number - 1)
+    val countLen = dataTable.Data.Length / dataTable.Page.Length
+    dataTable.Page.Count = if(countLen == 0) 1 else {
+      if(dataTable.Data.Length % dataTable.Page.Length > 0) countLen + 1 else countLen
+    }
+
+    var refSource = source.drop(dropLen).take(dataTable.Page.Length).map(data => projection(data)).result.save
     if (sourceMap != null) {
       refSource = sourceMap(refSource)
     }
 
-    selectInput.Data.Source = refSource.ToJson
-    selectInput.Page.Length = refSource.length
+    dataTable.Data.Source = refSource.ToJson
+    dataTable.Page.Length = refSource.length
 
-    selectInput.ToJson
+    dataTable.ToJson
   }
 
-  private def toDataTable[C](db: DbSource, query: Query[_, _, Seq], sourceMap: (Seq[C]) => Seq[C] = null)
+  def ToDataTableRef[C](db: DbSource, query: Query[_, _, Seq], sourceMap: (Seq[C]) => Seq[C] = null)
                     (searchCall: (String) => Query[_, _, Seq] = null)
                     (sortCall: (DataTableSort) => Query[_, _, Seq] = null)
                     (filterCall: (DataTableFilter) => Query[_, _, Seq] = null)(implicit tag: ClassTag[C], wr: Writes[C]) = {
@@ -115,7 +156,7 @@ final class RequestExtender[A](request: Request[A]) {
       })
     }
 
-    dataTable.Data.Length = source.CountVal
+    dataTable.Data.Length = source.count.result.save
 
     val dropLen = dataTable.Page.Length * (dataTable.Page.Number - 1)
     val countLen = dataTable.Data.Length / dataTable.Page.Length
@@ -123,7 +164,7 @@ final class RequestExtender[A](request: Request[A]) {
       if(dataTable.Data.Length % dataTable.Page.Length > 0) countLen + 1 else countLen
     }
 
-    var refSource = source.drop(dropLen).take(dataTable.Page.Length).ToRef[C]
+    var refSource = source.drop(dropLen).take(dataTable.Page.Length).toRef[C]
     if (sourceMap != null) {
       refSource = sourceMap(refSource)
     }
@@ -132,6 +173,88 @@ final class RequestExtender[A](request: Request[A]) {
     dataTable.Page.Length = refSource.length
 
     dataTable.ToJson
+  }
+
+  def ToSelect[C, T, E](db: DbSource, query: Query[T, E, Seq])
+                       (projection: (T) => MappedProjection[C, E], sourceMap: (Seq[C]) => Seq[C] = null)
+                       (searchCall: (String) => Query[T, E, Seq] = null, textCall: (Seq[Long]) => Query[T, E, Seq] = null)
+                       (implicit tag: ClassTag[C], wr: Writes[C]) = {
+    import db._
+
+    val selectInput = new SelectInput
+
+    selectInput.Search = request.queryString.get("search").filter(x => !x.isEmpty).map(x => x.head).headOption
+    selectInput.Page.Number = request.queryString.get("page").flatMap(x => x.flatMap(y => Try(y.toLong).toOption).headOption).getOrElse(1.toLong)
+    selectInput.Page.Length = request.queryString.get("length").flatMap(x => x.flatMap(y => Try(y.toLong).toOption).headOption).getOrElse(1.toLong)
+    selectInput.Data.Values = request.queryString.get("values").map(x => x.flatMap(y => Try(y.toLong).toOption)).getOrElse(Seq())
+
+    var source = query
+    if(searchCall != null && selectInput.Search.isDefined) {
+      source = searchCall(selectInput.Search.get)
+    }
+
+    val ids = request.queryString.get("ids").map(x => x.flatMap(y => Try(y.toLong).toOption)).getOrElse(Seq())
+    if(textCall != null && ids.length > 0) {
+      source = textCall(ids)
+    }
+
+    val dropLen = selectInput.Page.Length * (selectInput.Page.Number  - 1)
+    val dataLen = source.count.result.save
+    val countLen = dataLen / selectInput.Page.Length
+    selectInput.Page.Count = if(countLen == 0) 1 else {
+      if(selectInput.Data.Length % selectInput.Page.Length > 0) countLen + 1 else countLen
+    }
+
+    var refSource = source.drop(dropLen).take(selectInput.Page.Length).map(data => projection(data)).result.save
+    if (sourceMap != null) {
+      refSource = sourceMap(refSource)
+    }
+
+    selectInput.Data.Source = refSource.ToJson
+    selectInput.Page.Length = refSource.length
+
+    selectInput.ToJson
+  }
+
+  def ToSelectRef[C](db: DbSource, query: Query[_, _, Seq])
+                    (sourceMap: (Seq[C]) => Seq[C] = null)
+                    (searchCall: (String) => Query[_, _, Seq] = null, textCall: (Seq[Long]) => Query[_, _, Seq] = null)
+                    (implicit tag: ClassTag[C], wr: Writes[C]) = {
+    import db._
+
+    val selectInput = new SelectInput
+
+    selectInput.Search = request.queryString.get("search").filter(x => !x.isEmpty).map(x => x.head).headOption
+    selectInput.Page.Number = request.queryString.get("page").flatMap(x => x.flatMap(y => Try(y.toLong).toOption).headOption).getOrElse(1.toLong)
+    selectInput.Page.Length = request.queryString.get("length").flatMap(x => x.flatMap(y => Try(y.toLong).toOption).headOption).getOrElse(1.toLong)
+    selectInput.Data.Values = request.queryString.get("values").map(x => x.flatMap(y => Try(y.toLong).toOption)).getOrElse(Seq())
+
+    var source = query
+    if(searchCall != null && selectInput.Search.isDefined) {
+      source = searchCall(selectInput.Search.get)
+    }
+
+    val ids = request.queryString.get("ids").map(x => x.flatMap(y => Try(y.toLong).toOption)).getOrElse(Seq())
+    if(textCall != null && ids.length > 0) {
+      source = textCall(ids)
+    }
+
+    val dropLen = selectInput.Page.Length * (selectInput.Page.Number  - 1)
+    val dataLen = source.count.result.save
+    val countLen = dataLen / selectInput.Page.Length
+    selectInput.Page.Count = if(countLen == 0) 1 else {
+      if(selectInput.Data.Length % selectInput.Page.Length > 0) countLen + 1 else countLen
+    }
+
+    var refSource = source.drop(dropLen).take(selectInput.Page.Length).toRef[C]
+    if (sourceMap != null) {
+      refSource = sourceMap(refSource)
+    }
+
+    selectInput.Data.Source = refSource.ToJson
+    selectInput.Page.Length = refSource.length
+
+    selectInput.ToJson
   }
 
   def ToBody: String = {
@@ -189,70 +312,6 @@ final class RequestExtender[A](request: Request[A]) {
     return None
   }
 
-  def ToDataTable[C](db: DbSource, query: Query[_, _, Seq], sourceMap: (Seq[C]) => Seq[C] = null)
-                    (searchCall: (String) => Query[_, _, Seq] = null)
-                    (sortCall: (DataTableSort) => Query[_, _, Seq] = null)
-                    (filterCall: (DataTableFilter) => Query[_, _, Seq] = null)(implicit tag: ClassTag[C], wr: Writes[C]) = {
-    Results.Ok(this.toDataTable(db, query, sourceMap)(searchCall)(sortCall)(filterCall))
-  }
-
-  def ToDataTableJson[C](db: DbSource, query: Query[_, _, Seq], sourceMap: (Seq[C]) => Seq[C] = null)
-                    (searchCall: (String) => Query[_, _, Seq] = null)
-                    (sortCall: (DataTableSort) => Query[_, _, Seq] = null)
-                    (filterCall: (DataTableFilter) => Query[_, _, Seq] = null)(implicit tag: ClassTag[C], wr: Writes[C]) = {
-    this.toDataTable(db, query, sourceMap)(searchCall)(sortCall)(filterCall)
-  }
-
-  def ToSelectInput[C](db: DbSource, query: Query[_, _, Seq])
-                      (searchCall: (String) => Query[_, _, Seq] = null, textCall: (Seq[Long]) => Query[_, _, Seq] = null, sourceMap: (Seq[C]) => Seq[C] = null)
-                      (implicit tag: ClassTag[C], wr: Writes[C]) = {
-    Results.Ok(this.toSelectInput(db, query)(searchCall, textCall, sourceMap))
-  }
-
-  def ToSelectInputJson[C](db: DbSource, query: Query[_, _, Seq])
-                      (searchCall: (String) => Query[_, _, Seq] = null, textCall: (Seq[Long]) => Query[_, _, Seq] = null, sourceMap: (Seq[C]) => Seq[C] = null)
-                      (implicit tag: ClassTag[C], wr: Writes[C]) = {
-    this.toSelectInput(db, query)(searchCall, textCall, sourceMap)
-  }
-
-  def ToSelectInputOffline[C](query: Seq[C])
-                      (searchCall: (String) => Seq[C] = null, textCall: (Seq[Long]) => Seq[C] = null, sourceMap: (Seq[C]) => Seq[C] = null)
-                      (implicit tag: ClassTag[C], wr: Writes[C]) = {
-    val selectInput = new SelectInput
-
-    selectInput.Search = request.queryString.get("search").filter(x => !x.isEmpty).map(x => x.head).headOption
-    selectInput.Page.Number = request.queryString.get("page").flatMap(x => x.flatMap(y => Try(y.toLong).toOption).headOption).getOrElse(1.toLong)
-    selectInput.Page.Length = request.queryString.get("length").flatMap(x => x.flatMap(y => Try(y.toLong).toOption).headOption).getOrElse(1.toLong)
-    selectInput.Data.Values = request.queryString.get("values").map(x => x.flatMap(y => Try(y.toLong).toOption)).getOrElse(Seq())
-
-    var source = query
-    if(searchCall != null && selectInput.Search.isDefined) {
-      source = searchCall(selectInput.Search.get)
-    }
-
-    val ids = request.queryString.get("ids").map(x => x.flatMap(y => Try(y.toLong).toOption)).getOrElse(Seq())
-    if(textCall != null && ids.length > 0) {
-      source = textCall(ids)
-    }
-
-    val dropLen = selectInput.Page.Length * (selectInput.Page.Number  - 1)
-    val dataLen = source.length
-    val countLen = dataLen / selectInput.Page.Length
-    selectInput.Page.Count = if(countLen == 0) 1 else {
-      if(selectInput.Data.Length % selectInput.Page.Length > 0) countLen + 1 else countLen
-    }
-
-    var refSource = source.drop(dropLen.toInt).take(selectInput.Page.Length.toInt)
-    if (sourceMap != null) {
-      refSource = sourceMap(refSource)
-    }
-
-    selectInput.Data.Source = refSource.ToJson
-    selectInput.Page.Length = refSource.length
-
-    Results.Ok(selectInput.ToJson)
-  }
-
   def ToRouteGuard[C](db: DbSource)
                      (homeCall: (String, Option[String]) => Query[_, _, Seq])
                      (routeCall: (String, String, Option[String]) => Query[_, _, Seq])
@@ -276,25 +335,25 @@ final class RequestExtender[A](request: Request[A]) {
         source = routeCall(path, path.substring(1, path.length), lang)
       }
 
-      val route = source.take(1).ToRef[C].headOption
+      val route = source.take(1).toRef[C].headOption
       if (route.isDefined) {
         var hasAuth = false
         if (authCall != null) {
-          hasAuth = (authCall(path).length > 0).result.Save
+          hasAuth = (authCall(path).length > 0).result.save
         } else { hasAuth = true }
 
         if (hasAuth) {
           guard.Data = route.get.ToJson
         } else {
           source = errorCall(e401, lang)
-          val error = source.take(1).ToRef[C].headOption
+          val error = source.take(1).toRef[C].headOption
           if (error.isDefined) {
             guard.Error = error.get.ToJson
           }
         }
       } else {
         source = errorCall(e404, lang)
-        val error = source.take(1).ToRef[C].headOption
+        val error = source.take(1).toRef[C].headOption
         if (error.isDefined) {
           guard.Error = error.get.ToJson
         }
