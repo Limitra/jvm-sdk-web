@@ -1,10 +1,8 @@
 package com.limitra.sdk.web.composition
 
-import com.limitra.sdk.database.mysql.DbSource
-import com.limitra.sdk.web.{definition, _}
 import com.limitra.sdk.web.definition._
+import com.limitra.sdk.web.{definition, _}
 import play.api.mvc._
-import slick.lifted.Rep
 
 import scala.concurrent._
 

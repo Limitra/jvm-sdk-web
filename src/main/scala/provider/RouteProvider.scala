@@ -1,8 +1,8 @@
 package com.limitra.sdk.web.provider
 
-import com.limitra.sdk.core.{Config => conf}
 import java.io.{File, PrintWriter}
 
+import com.limitra.sdk.core.{Config => conf}
 import com.limitra.sdk.web.definition.RouteItem
 
 /**

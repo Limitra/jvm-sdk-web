@@ -1,7 +1,7 @@
 package com.limitra.sdk.web.composition
 
-import com.limitra.sdk.web._
 import com.limitra.sdk.database.mysql.DbSource
+import com.limitra.sdk.web._
 import com.limitra.sdk.web.definition._
 import play.api.mvc._
 import slick.lifted.Rep
@@ -24,7 +24,7 @@ sealed class Authentication(parser: BodyParser[AnyContent], db: DbSource, query:
     }
 
     if (jwt.isDefined && jwt.get.IsValid) {
-      val valid = this.query(jwt.get).result.Save
+      val valid = this.query(jwt.get).result.save
       if (valid) {
         block(request)
       } else { forbidden() }

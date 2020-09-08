@@ -4,7 +4,7 @@ import com.limitra.sdk.database.mysql.DbSource
 import com.limitra.sdk.web._
 import com.limitra.sdk.web.definition._
 import play.api.mvc._
-import slick.lifted.{Query, Rep}
+import slick.lifted.Query
 
 import scala.concurrent._
 
@@ -28,7 +28,7 @@ sealed class Authorization(parser: BodyParser[AnyContent], db: DbSource, query: 
 
     if (jwt.isDefined && jwt.get.IsValid) {
       var valid: Boolean = false
-      val routes: Seq[String] = this.query(jwt.get).Execute
+      val routes: Seq[String] = this.query(jwt.get).result.save
       routes.foreach(route => {
         var uri = ""
         route.split('/').foreach(partial => {
