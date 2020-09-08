@@ -5,6 +5,19 @@ import com.limitra.sdk.core._
 import com.limitra.sdk.web.definition.{JsonWebToken => JWT}
 import play.api.libs.json.Json
 
+case class ChatHubBodyDTO(var SeenDate: Option[Long] = None,
+                          var SenderName: Option[String] = None,
+                          var SenderAbout: Option[String] = None,
+                          var SenderEmail: Option[String] = None,
+                          var DeviceIdentity: Option[String] = None,
+                          var TransmitterID: Option[Long] = None,
+                          var SessionID: Option[Long] = None,
+                          var Message: Option[String] = None,
+                          var Token: Option[String] = None,
+                          var RegisterDate: Option[Long] = None,
+                          var IsSelf: Option[Boolean] = None,
+                          var Type: String = "")
+
 /**
  * JWT token provider for web authentications.
  */

@@ -1,8 +1,6 @@
 package com.limitra.sdk.web.definition
 
-import com.limitra.sdk.web._
 import play.api.libs.json.Json
-import play.api.mvc.Request
 
 case class JsonResultNotify(var Title: String = "",
                             var Status: String = "",
