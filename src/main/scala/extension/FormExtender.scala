@@ -46,7 +46,7 @@ final class FormExtender[A](value: Form[A])(implicit request: Request[_]) {
     )
   }
 
-  def ToJsonResultAsync[B](call: (A, JsonResult) => Result, errCall: (Form[A], JsonResult) => Unit = null)(implicit request: Request[B], ec: ExecutionContext) = {
+  def ToJsonResultAsync[B](call: (A, JsonResult) => Future[Result], errCall: (Form[A], JsonResult) => Unit = null)(implicit request: Request[B], ec: ExecutionContext) = {
     value.bindFromRequest.fold(
       error => {
         val result = this._defError
@@ -56,7 +56,7 @@ final class FormExtender[A](value: Form[A])(implicit request: Request[_]) {
         Future { Results.BadRequest(result.ToJson) }
       },
       form => {
-        Future { call(form, this._defSuccess) }
+        call(form, this._defSuccess)
       }
     )
   }
