@@ -7,7 +7,7 @@ import play.api.libs.json.{JsValue, Writes}
 import play.api.mvc.{Request, Result, Results}
 import slick.lifted.{MappedProjection, Query}
 
-import scala.concurrent.Future
+import scala.concurrent.{ExecutionContext, Future}
 import scala.reflect.ClassTag
 import scala.util.Try
 
@@ -293,7 +293,7 @@ final class RequestExtender[A](request: Request[A]) {
     call(result)
   }
 
-  def ToJsonResultAsync(call: (JsonResult) => Result) = {
+  def ToJsonResultAsync(call: (JsonResult) => Result)(implicit ec: ExecutionContext) = {
     val result = new JsonResult {
       Notification = Some(new JsonResultNotify {
         Status = NotifyStatus.Success;
@@ -301,7 +301,7 @@ final class RequestExtender[A](request: Request[A]) {
         Message = Response(request).Read("Ok")
       })
     }
-    Future.successful(call(result))
+    Future { call(result) }
   }
 
   def ToJwt: Option[JsonWebToken] =  {
