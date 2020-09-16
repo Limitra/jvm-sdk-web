@@ -5,6 +5,8 @@ import com.limitra.sdk.web.definition._
 import play.api.data.Form
 import play.api.mvc.{Request, Result, Results}
 
+import scala.concurrent.{ExecutionContext, Future}
+
 /**
   * Extension methods for Form type.
   */
@@ -40,6 +42,21 @@ final class FormExtender[A](value: Form[A])(implicit request: Request[_]) {
       },
       form => {
         call(form, this._defSuccess)
+      }
+    )
+  }
+
+  def ToJsonResultAsync[B](call: (A, JsonResult) => Result, errCall: (Form[A], JsonResult) => Unit = null)(implicit request: Request[B], ec: ExecutionContext) = {
+    value.bindFromRequest.fold(
+      error => {
+        val result = this._defError
+        if (errCall != null) {
+          errCall(error, result)
+        }
+        Future { Results.BadRequest(result.ToJson) }
+      },
+      form => {
+        Future { call(form, this._defSuccess) }
       }
     )
   }
