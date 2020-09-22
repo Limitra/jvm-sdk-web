@@ -153,6 +153,10 @@ final class RequestExtender[A](request: Request[A]) {
     return request.queryString.get("ids").map(x => x.flatMap(y => Try(y.toLong).toOption)).getOrElse(Seq())
   }
 
+  def Search: Option[String] = {
+    return request.queryString.get("search").filter(x => !x.isEmpty).map(x => x.head).headOption
+  }
+
   def Language: Option[String] = {
     return request.headers.get("Language")
   }
