@@ -15,7 +15,7 @@ sealed class RouteProvider {
     if (_path.isDefined) {
       val pw = new PrintWriter(new File(_path.get + "/conf/" + (if (file != null) file else "routes")))
       routes.foreach(route => {
-        val row = route.Type_Name + " " + route.Route + " " + route.EndPoint
+        val row = route.TypeName + " " + route.Route + " " + route.EndPoint
         pw.println(row)
       })
       pw.close
