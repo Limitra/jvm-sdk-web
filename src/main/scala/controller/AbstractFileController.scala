@@ -3,7 +3,6 @@ package com.limitra.sdk.web.controller
 import java.io.File
 import java.text.SimpleDateFormat
 
-import com.limitra.sdk.core.Config
 import com.limitra.sdk.web.definition.FileUploadResult
 import javax.inject._
 import org.joda.time.DateTime

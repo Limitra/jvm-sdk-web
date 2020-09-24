@@ -3,7 +3,6 @@ package com.limitra.sdk.web.provider
 import java.awt.Font
 import java.io.{File, FileOutputStream}
 
-import com.limitra.sdk.core.Config
 import com.limitra.sdk.web
 import com.sksamuel.scrimage.nio.{JpegWriter, PngWriter}
 import com.sksamuel.scrimage.{Color, Image}

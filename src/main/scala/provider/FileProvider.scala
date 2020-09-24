@@ -2,8 +2,6 @@ package com.limitra.sdk.web.provider
 
 import java.io.File
 
-import com.limitra.sdk.core.Config
-
 /**
  * It is used to make customized and file upload operations.
  */

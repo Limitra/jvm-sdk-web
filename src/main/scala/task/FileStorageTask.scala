@@ -3,7 +3,6 @@ package com.limitra.sdk.web.task
 import java.io.File
 
 import akka.actor.ActorSystem
-import com.limitra.sdk.core.Config
 import javax.inject.Inject
 import org.joda.time.DateTime
 
