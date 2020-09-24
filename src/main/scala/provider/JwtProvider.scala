@@ -1,7 +1,6 @@
 package com.limitra.sdk.web.provider
 
 import authentikat.jwt._
-import com.limitra.sdk.core._
 import com.limitra.sdk.web.definition.{JsonWebToken => JWT}
 import play.api.libs.json.Json
 

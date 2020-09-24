@@ -1,10 +1,8 @@
 package com.limitra.sdk.web.composition
 
-import com.limitra.sdk.database.mysql.DbSource
 import com.limitra.sdk.web.definition
 import com.limitra.sdk.web.definition.JsonWebToken
 import play.api.mvc._
-import slick.lifted.{Query, Rep}
 
 import scala.concurrent.ExecutionContext
 
