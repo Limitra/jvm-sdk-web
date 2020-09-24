@@ -1,11 +1,9 @@
 package com.limitra.sdk.web.extension
 
-import com.limitra.sdk.database.mysql.DbSource
 import com.limitra.sdk.web._
 import com.limitra.sdk.web.definition._
 import play.api.libs.json.{JsValue, Writes}
-import play.api.mvc.{Request, Result, Results}
-import slick.lifted.{MappedProjection, Query}
+import play.api.mvc.{Request, Result}
 
 import scala.concurrent.{ExecutionContext, Future}
 import scala.reflect.ClassTag
@@ -21,7 +19,6 @@ final class RequestExtender[A](request: Request[A]) {
                                     (sortCall: (DataTableSort) => Query[T, E, Seq] = null)
                                     (filterCall: (DataTableFilter) => Query[T, E, Seq] = null)
                    (implicit tag: ClassTag[C], wr: Writes[C]): JsValue = {
-    import db._
     val dataTable = new DataTable
     dataTable.Search = request.queryString.get("search").filter(x => !x.isEmpty).map(x => x.head).headOption
 
@@ -100,7 +97,6 @@ final class RequestExtender[A](request: Request[A]) {
                        (projection: (T) => MappedProjection[C, E], sourceMap: (Seq[C]) => Seq[C] = null)
                        (searchCall: (String) => Query[T, E, Seq] = null, textCall: (Seq[Long]) => Query[T, E, Seq] = null)
                        (implicit tag: ClassTag[C], wr: Writes[C]) = {
-    import db._
 
     val selectInput = new SelectInput
 
@@ -191,61 +187,9 @@ final class RequestExtender[A](request: Request[A]) {
   def ToJwt: Option[JsonWebToken] =  {
     val header = request.headers.get("Authorization")
     if (header.isDefined && !header.isEmpty) {
-      return Jwt.ReadToken(header.get)
-    }
-    return None
-  }
-
-  def ToRouteGuard[C](db: DbSource)
-                     (homeCall: (String, Option[String]) => Query[_, _, Seq])
-                     (routeCall: (String, String, Option[String]) => Query[_, _, Seq])
-                     (errorCall: (String, Option[String]) => Query[_, _, Seq])
-                     (authCall: (String) => Query[_, _, Seq] = null)(implicit tag: ClassTag[C], wr: Writes[C]) = {
-    import db._
-
-    val path = request.queryString.get("path").filter(x => !x.isEmpty).map(x => x.head).headOption.getOrElse("")
-    val lang = request.queryString.get("lang").filter(x => !x.isEmpty).map(x => x.head).headOption
-
-    val e401 = request.queryString.get("e401").filter(x => !x.isEmpty).map(x => x.head).headOption.getOrElse("401")
-    val e404 = request.queryString.get("e404").filter(x => !x.isEmpty).map(x => x.head).headOption.getOrElse("404")
-
-    val guard = new RouteGuard()
-
-    if (homeCall != null && routeCall != null && errorCall != null) {
-      var source: slick.lifted.Query[_, _, Seq] = null
-      if (path == "/") {
-        source = homeCall(path, lang)
-      } else {
-        source = routeCall(path, path.substring(1, path.length), lang)
-      }
-
-      val route = source.take(1).toRef[C].headOption
-      if (route.isDefined) {
-        var hasAuth = false
-        if (authCall != null) {
-          hasAuth = (authCall(path).length > 0).result.save
-        } else { hasAuth = true }
-
-        if (hasAuth) {
-          guard.Data = route.get.ToJson
-        } else {
-          source = errorCall(e401, lang)
-          val error = source.take(1).toRef[C].headOption
-          if (error.isDefined) {
-            guard.Error = error.get.ToJson
-          }
-        }
-      } else {
-        source = errorCall(e404, lang)
-        val error = source.take(1).toRef[C].headOption
-        if (error.isDefined) {
-          guard.Error = error.get.ToJson
-        }
-      }
-
-      Results.Ok(guard.ToJson)
+      Jwt.ReadToken(header.get)
     } else {
-      Results.NotImplemented("Error: Not implemented")
+      None
     }
   }
 }
