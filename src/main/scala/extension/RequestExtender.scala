@@ -1,9 +1,11 @@
 package com.limitra.sdk.web.extension
 
+import com.limitra.sdk.database.mysql.DbSource
 import com.limitra.sdk.web._
 import com.limitra.sdk.web.definition._
 import play.api.libs.json.{JsValue, Writes}
 import play.api.mvc.{Request, Result}
+import slick.lifted.{MappedProjection, Query}
 
 import scala.concurrent.{ExecutionContext, Future}
 import scala.reflect.ClassTag
@@ -19,6 +21,7 @@ final class RequestExtender[A](request: Request[A]) {
                                     (sortCall: (DataTableSort) => Query[T, E, Seq] = null)
                                     (filterCall: (DataTableFilter) => Query[T, E, Seq] = null)
                    (implicit tag: ClassTag[C], wr: Writes[C]): JsValue = {
+    import db._
     val dataTable = new DataTable
     dataTable.Search = request.queryString.get("search").filter(x => !x.isEmpty).map(x => x.head).headOption
 
@@ -97,7 +100,7 @@ final class RequestExtender[A](request: Request[A]) {
                        (projection: (T) => MappedProjection[C, E], sourceMap: (Seq[C]) => Seq[C] = null)
                        (searchCall: (String) => Query[T, E, Seq] = null, textCall: (Seq[Long]) => Query[T, E, Seq] = null)
                        (implicit tag: ClassTag[C], wr: Writes[C]) = {
-
+    import db._
     val selectInput = new SelectInput
 
     selectInput.Search = request.queryString.get("search").filter(x => !x.isEmpty).map(x => x.head).headOption
