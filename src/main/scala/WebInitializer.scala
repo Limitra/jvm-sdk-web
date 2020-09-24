@@ -1,5 +1,7 @@
 package com.limitra.sdk
 
+import com.limitra.sdk.core.{definition => df}
+import com.limitra.sdk.core.extension.{BigDecimalExtender, DateTimeExtender, LongExtender}
 import com.limitra.sdk.web.extension._
 import com.limitra.sdk.web.provider._
 import org.joda.time.DateTime

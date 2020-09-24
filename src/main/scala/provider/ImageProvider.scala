@@ -1,5 +1,6 @@
 package com.limitra.sdk.web.provider
 
+import com.limitra.sdk.core._
 import java.awt.Font
 import java.io.{File, FileOutputStream}
 
