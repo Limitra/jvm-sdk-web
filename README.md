@@ -23,57 +23,57 @@ Apache Maven
 <dependency>
   <groupId>com.limitra.sdk</groupId>
   <artifactId>web_2.12.12</artifactId>
-  <version>0.0.1</version>
+  <version>0.0.2</version>
 </dependency>
 ````
 
 Gradle Groovy DSL
 ````Gradle Groovy DSL
-implementation 'com.limitra.sdk:web_2.12.12:0.0.1'
+implementation 'com.limitra.sdk:web_2.12.12:0.0.2'
 ````
 
 Gradle Kotlin DSL
 ````Gradle Kotlin DSL
-compile("com.limitra.sdk:web_2.12.12:0.0.1")
+compile("com.limitra.sdk:web_2.12.12:0.0.2")
 ````
 
 Scala SBT
 ````Scala SBT
-libraryDependencies += "com.limitra.sdk" %% "web_2.12.12" % "0.0.1"
+libraryDependencies += "com.limitra.sdk" %% "web_2.12.12" % "0.0.2"
 ````
 
 Apache Ivy
 ````Apache Ivy
-<dependency org="com.limitra.sdk" name="web_2.12.12" rev="0.0.1" />
+<dependency org="com.limitra.sdk" name="web_2.12.12" rev="0.0.2" />
 ````
 
 Groovy Grape
 ````Groovy Grape
 @Grapes(
-  @Grab(group='com.limitra.sdk', module='web_2.12.12', version='0.0.1')
+  @Grab(group='com.limitra.sdk', module='web_2.12.12', version='0.0.2')
 )
 ````
 
 Leiningen
 ````Leiningen
-[com.limitra.sdk/web_2.12.12 "0.0.1"]
+[com.limitra.sdk/web_2.12.12 "0.0.2"]
 ````
 
 Apache Buildr
 ````Apache Buildr
-'com.limitra.sdk:web_2.12.12:jar:0.0.1'
+'com.limitra.sdk:web_2.12.12:jar:0.0.2'
 ````
 
 PURL
 ````PURL
-pkg:maven/com.limitra.sdk/web_2.12.12@0.0.1
+pkg:maven/com.limitra.sdk/web_2.12.12@0.0.2
 ````
 
 Bazel
 ````Bazel
 maven_jar(
     name = "web_2.12.12",
-    artifact = "com.limitra.sdk:web_2.12.12:0.0.1",
+    artifact = "com.limitra.sdk:web_2.12.12:0.0.2",
     sha1 = "6d3e606a6b61ea9295884efa7bca40392f5b5f1e",
 )
 ````
