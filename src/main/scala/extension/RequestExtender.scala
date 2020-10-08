@@ -20,7 +20,7 @@ final class RequestExtender[A](request: Request[A]) {
                                     (searchCall: (String) => Query[T, E, Seq] = null)
                                     (sortCall: (DataTableSort) => Query[T, E, Seq] = null)
                                     (filterCall: (DataTableFilter) => Query[T, E, Seq] = null)
-                   (implicit tag: ClassTag[C], wr: Writes[C]): JsValue = {
+                   (implicit tag: ClassTag[C], wr: Writes[C], ex: ExecutionContext) = {
     import db._
     val dataTable = new DataTable
     dataTable.Search = request.queryString.get("search").filter(x => !x.isEmpty).map(x => x.head).headOption
@@ -85,21 +85,23 @@ final class RequestExtender[A](request: Request[A]) {
       if(dataTable.Data.Length % dataTable.Page.Length > 0) countLen + 1 else countLen
     }
 
-    var refSource = source.drop(dropLen).take(dataTable.Page.Length).map(data => projection(data)).result.save
-    if (sourceMap != null) {
-      refSource = sourceMap(refSource)
-    }
+    source.drop(dropLen).take(dataTable.Page.Length).map(data => projection(data)).result.saveAsync.map(refSource => {
+      var mapper = refSource
+      if (sourceMap != null) {
+        mapper = sourceMap(refSource)
+      }
 
-    dataTable.Data.Source = refSource.ToJson
-    dataTable.Page.Length = refSource.length
+      dataTable.Data.Source = refSource.ToJson
+      dataTable.Page.Length = refSource.length
 
-    dataTable.ToJson
+      dataTable.ToJson
+    })
   }
 
   def ToSelect[C, T, E](db: DbSource, query: Query[T, E, Seq])
                        (projection: (T) => MappedProjection[C, E], sourceMap: (Seq[C]) => Seq[C] = null)
                        (searchCall: (String) => Query[T, E, Seq] = null, textCall: (Seq[Long]) => Query[T, E, Seq] = null)
-                       (implicit tag: ClassTag[C], wr: Writes[C]) = {
+                       (implicit tag: ClassTag[C], wr: Writes[C], ex: ExecutionContext) = {
     import db._
     val selectInput = new SelectInput
 
@@ -114,26 +116,29 @@ final class RequestExtender[A](request: Request[A]) {
     }
 
     val ids = request.queryString.get("ids").map(x => x.flatMap(y => Try(y.toLong).toOption)).getOrElse(Seq())
-    if(textCall != null && ids.length > 0) {
+    val reqType = request.queryString.get("type").getOrElse(Seq()).headOption.getOrElse("").equals(RequestQueryType.Text)
+    if(textCall != null && reqType) {
       source = textCall(ids)
     }
 
     val dropLen = selectInput.Page.Length * (selectInput.Page.Number  - 1)
-    val dataLen = source.count.result.save
-    val countLen = dataLen / selectInput.Page.Length
+    selectInput.Data.Length = source.count.result.save
+    val countLen = selectInput.Data.Length / selectInput.Page.Length
     selectInput.Page.Count = if(countLen == 0) 1 else {
       if(selectInput.Data.Length % selectInput.Page.Length > 0) countLen + 1 else countLen
     }
 
-    var refSource = source.drop(dropLen).take(selectInput.Page.Length).map(data => projection(data)).result.save
-    if (sourceMap != null) {
-      refSource = sourceMap(refSource)
-    }
+    source.drop(dropLen).take(selectInput.Page.Length).map(data => projection(data)).result.saveAsync.map(refSource => {
+      var mapper = refSource
+      if (sourceMap != null) {
+        mapper = sourceMap(refSource)
+      }
 
-    selectInput.Data.Source = refSource.ToJson
-    selectInput.Page.Length = refSource.length
+      selectInput.Data.Source = mapper.ToJson
+      selectInput.Page.Length = mapper.length
 
-    selectInput.ToJson
+      selectInput.ToJson
+    })
   }
 
   def ToBody: String = {
@@ -146,6 +151,10 @@ final class RequestExtender[A](request: Request[A]) {
 
   def Host: String = {
     return request.headers.get("X-Forwarded-Host").getOrElse("localhost")
+  }
+
+  def QueryType: Option[String] = {
+    return request.queryString.get("type").getOrElse(Seq()).headOption
   }
 
   def Identities: Seq[Long] = {
