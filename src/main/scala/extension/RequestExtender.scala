@@ -108,7 +108,7 @@ final class RequestExtender[A](request: Request[A]) {
     selectInput.Search = request.queryString.get("search").filter(x => !x.isEmpty).map(x => x.head).headOption
     selectInput.Page.Number = request.queryString.get("page").flatMap(x => x.flatMap(y => Try(y.toLong).toOption).headOption).getOrElse(1.toLong)
     selectInput.Page.Length = request.queryString.get("length").flatMap(x => x.flatMap(y => Try(y.toLong).toOption).headOption).getOrElse(1.toLong)
-    selectInput.Data.Values = request.queryString.get("values").map(x => x.flatMap(y => Try(y.toLong).toOption)).getOrElse(Seq())
+    selectInput.Data.Values = request.queryString.get("ids").map(x => x.flatMap(y => Try(y.toLong).toOption)).getOrElse(Seq())
 
     var source = query
     if(searchCall != null && selectInput.Search.isDefined) {
