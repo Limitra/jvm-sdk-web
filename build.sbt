@@ -1,7 +1,7 @@
 name := "web"
 
-version := "0.0.5"
-scalaVersion := "2.12.8"
+version := "0.0.7"
+scalaVersion := "2.12.9"
 
 libraryDependencies ++= Seq(
   "com.typesafe.play" %% "play" % "2.8.2",
@@ -9,5 +9,5 @@ libraryDependencies ++= Seq(
   "com.sksamuel.scrimage" %% "scrimage-core" % "3.0.0-alpha4",
   "com.sksamuel.scrimage" %% "scrimage-io-extra" % "3.0.0-alpha4",
   "com.sksamuel.scrimage" %% "scrimage-filters" % "3.0.0-alpha4",
-  "com.limitra.sdk" %% "database" % "0.0.3"
+  "com.limitra.sdk" %% "database" % "0.0.4"
 )
