@@ -24,10 +24,11 @@ sealed class Authentication(parser: BodyParser[AnyContent], db: DbSource, query:
     }
 
     if (jwt.isDefined && jwt.get.IsValid) {
-      val valid = this.query(jwt.get).result.save
-      if (valid) {
-        block(request)
-      } else { forbidden() }
+      this.query(jwt.get).result.saveAsync.flatMap(valid => {
+        if (valid) {
+          block(request)
+        } else { forbidden() }
+      })
     } else { forbidden() }
   }
 }
