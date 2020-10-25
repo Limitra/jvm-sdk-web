@@ -28,20 +28,22 @@ sealed class Authorization(parser: BodyParser[AnyContent], db: DbSource, query: 
 
     if (jwt.isDefined && jwt.get.IsValid) {
       var valid: Boolean = false
-      val routes: Seq[String] = this.query(jwt.get).result.save
-      routes.foreach(route => {
-        var uri = ""
-        route.split('/').foreach(partial => {
-          uri = uri + (if (partial.contains(":")) "/*.*" else "/" + partial)
+      this.query(jwt.get).result.saveAsync.flatMap(routes => {
+        routes.foreach(route => {
+          var uri = ""
+          route.split('/').foreach(partial => {
+            uri = uri + (if (partial.contains(":")) "/*.*" else "/" + partial)
+          })
+          uri = uri.replace("//", "/").replace("/", """\/""")
+          if (request.path.matches(uri)) {
+            valid = true
+          }
         })
-        uri = uri.replace("//", "/").replace("/", """\/""")
-        if (request.path.matches(uri)) {
-          valid = true
-        }
+
+        if (valid) {
+          block(request)
+        } else { unauthorized() }
       })
-      if (valid) {
-        block(request)
-      } else { unauthorized() }
     } else { unauthorized() }
   }
 }
