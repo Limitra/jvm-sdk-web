@@ -1,13 +1,10 @@
 name := "web"
 
-version := "0.0.7"
+version := "0.0.9"
 scalaVersion := "2.12.9"
 
 libraryDependencies ++= Seq(
-  "com.typesafe.play" %% "play" % "2.8.2",
+  "com.typesafe.play" %% "play" % "2.8.7",
   "com.jason-goodwin" %% "authentikat-jwt" % "0.4.5",
-  "com.sksamuel.scrimage" %% "scrimage-core" % "3.0.0-alpha4",
-  "com.sksamuel.scrimage" %% "scrimage-io-extra" % "3.0.0-alpha4",
-  "com.sksamuel.scrimage" %% "scrimage-filters" % "3.0.0-alpha4",
-  "com.limitra.sdk" %% "database" % "0.0.4"
+  "com.limitra.sdk" %% "database" % "0.0.5"
 )
