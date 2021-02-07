@@ -22,6 +22,7 @@ final class RequestExtender[A](request: Request[A]) {
                                     (filterCall: (DataTableFilter) => Query[T, E, Seq] = null)
                    (implicit tag: ClassTag[C], wr: Writes[C], ex: ExecutionContext) = {
     import db._
+    import db.slave._
     val dataTable = new DataTable
     dataTable.Search = request.queryString.get("search").filter(x => !x.isEmpty).map(x => x.head).headOption
 
@@ -103,6 +104,7 @@ final class RequestExtender[A](request: Request[A]) {
                        (searchCall: (String) => Query[T, E, Seq] = null, textCall: (Seq[Long]) => Query[T, E, Seq] = null)
                        (implicit tag: ClassTag[C], wr: Writes[C], ex: ExecutionContext) = {
     import db._
+    import db.slave._
     val selectInput = new SelectInput
 
     selectInput.Search = request.queryString.get("search").filter(x => !x.isEmpty).map(x => x.head).headOption
