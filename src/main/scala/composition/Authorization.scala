@@ -11,6 +11,7 @@ import scala.concurrent._
 sealed class Authorization(parser: BodyParser[AnyContent], db: DbSource, query: (JsonWebToken) => Query[_, String, Seq])
                           (implicit ec: ExecutionContext) extends ActionBuilderImpl(parser) {
   import db._
+  import db.slave._
   var jresult = new JsonResult
 
   override def invokeBlock[A](request: Request[A],
