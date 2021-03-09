@@ -9,6 +9,7 @@ import javax.inject._
 import org.joda.time.DateTime
 import play.api.libs.json._
 import play.api.mvc._
+import play.api.libs.Files
 
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -65,7 +66,10 @@ abstract class AbstractFileController(cc: ControllerComponents, ca: ActionBuilde
   }
 
   def Upload = ca(parse.multipartFormData).async { implicit request =>
-    val file = request.body.files.headOption
+    this._upload(request.body.files.headOption)
+  }
+
+  def _upload(file: Option[MultipartFormData.FilePart[Files.TemporaryFile]]) = {
     if (file.isDefined) {
       val path = this._config.OptionString("Path")
       if (path.isDefined) {
@@ -74,19 +78,19 @@ abstract class AbstractFileController(cc: ControllerComponents, ca: ActionBuilde
 
         if (conType.isDefined && this._imageTypes.contains(conType.get)) {
           if (file.get.fileSize <= _config.Get("Image").OptionInt("MaxLength").getOrElse(_maxLen)) {
-            this._image.apply(request)
+            this._image(file.get)
           } else { tooLarge }
         } else if (conType.isDefined && this._audioTypes.contains(conType.get)) {
           if (file.get.fileSize <= _config.Get("Audio").OptionInt("MaxLength").getOrElse(_maxLen)) {
-            this._audio.apply(request)
+            this._audio(file.get)
           } else { tooLarge }
         } else if (conType.isDefined && this._videoTypes.contains(conType.get)) {
           if (file.get.fileSize <= _config.Get("Video").OptionInt("MaxLength").getOrElse(_maxLen)) {
-            this._video.apply(request)
+            this._video(file.get)
           } else { tooLarge }
         } else if (conType.isDefined && this._documentTypes.contains(conType.get)) {
           if (file.get.fileSize <= _config.Get("Document").OptionInt("MaxLength").getOrElse(_maxLen)) {
-            this._document.apply(request)
+            this._document(file.get)
           } else { tooLarge }
         } else { Future.successful(UnsupportedMediaType("Error: Unsupported media type")) }
       } else {
@@ -97,8 +101,7 @@ abstract class AbstractFileController(cc: ControllerComponents, ca: ActionBuilde
     }
   }
 
-  private def _uploadFile(fileSelector: String, request: Request[MultipartFormData[play.api.libs.Files.TemporaryFile]]): Future[Result] = {
-    val file = request.body.files.head
+  private def _uploadFile(fileSelector: String, file: MultipartFormData.FilePart[Files.TemporaryFile]): Future[Result] = {
     val sourcePath = (this._config.String("Path") + "/temp").replace("//", "/")
     val folder = this._config.Get(fileSelector).OptionString("Folder")
     var targetPath = sourcePath
@@ -127,19 +130,19 @@ abstract class AbstractFileController(cc: ControllerComponents, ca: ActionBuilde
     })))
   }
 
-  private def _image = ca(parse.multipartFormData).async { implicit request =>
-    this._uploadFile("Image", request)
+  private def _image(file: MultipartFormData.FilePart[Files.TemporaryFile]) = {
+    this._uploadFile("Image", file)
   }
 
-  private def _audio = ca(parse.multipartFormData).async { implicit request =>
-    this._uploadFile("Audio", request)
+  private def _audio(file: MultipartFormData.FilePart[Files.TemporaryFile]) = {
+    this._uploadFile("Audio", file)
   }
 
-  private def _video = ca(parse.multipartFormData).async { implicit request =>
-    this._uploadFile("Video", request)
+  private def _video(file: MultipartFormData.FilePart[Files.TemporaryFile]) = {
+    this._uploadFile("Video", file)
   }
 
-  private def _document = ca(parse.multipartFormData).async { implicit request =>
-    this._uploadFile("Document", request)
+  private def _document(file: MultipartFormData.FilePart[Files.TemporaryFile]) = {
+    this._uploadFile("Document", file)
   }
 }
