@@ -1,8 +1,8 @@
 package com.limitra.sdk.web.provider
 
-import authentikat.jwt._
 import com.limitra.sdk.core._
 import com.limitra.sdk.web.definition.{JsonWebToken => JWT}
+import pdi.jwt.{JwtAlgorithm, JwtJson}
 import play.api.libs.json.Json
 
 case class ChatHubBodyDTO(var SeenDate: Option[Long] = None,
@@ -23,13 +23,13 @@ case class ChatHubBodyDTO(var SeenDate: Option[Long] = None,
  */
 sealed class JwtProvider {
   private val _config = Config("Security")
-  private val _header = JwtHeader("HS256")
+  private val _algorithm = JwtAlgorithm.HS256
   private val _secret = _config.String("Secret")
   private val _prefix = _config.String("Prefix")
 
   def CreateToken(id: Long, password: String, expire: Long, detail: String = ""): String = {
-    var payLoad = JwtClaimsSet(Map("id" -> id, "expire" -> expire, "roles" -> Seq(password, detail)))
-    this._prefix + " " + JsonWebToken(_header, payLoad, _secret)
+    val claim = Json.obj(("id", id), ("expire", expire), ("password", password), ("detail", detail))
+    this._prefix + " " + JwtJson.encode(claim, _secret, _algorithm)
   }
 
   def ReadToken(jwt: String): Option[JWT] = {
@@ -49,35 +49,15 @@ sealed class JwtProvider {
   }
 
   private def _getJwtClaims(jwt: String): JWT = {
-    var jwtT = JWT()
-    val claims = this._claims(jwt)
+    val jwtT = JWT()
+    val claims = JwtJson.decodeJson(jwt, _secret, Seq(_algorithm)).toOption
     if (claims.isDefined) {
-      val claimsVal = Json.parse(claims.get)
+      val claimsVal = claims.get
       jwtT.ID = (claimsVal \ "id").as[Long]
       jwtT.Expire = (claimsVal \ "expire").as[Long]
-      val roles = (claimsVal \ "roles").as[Seq[String]]
-      jwtT.Password = roles.head
-      jwtT.Detail = roles.last
-      jwtT.IsValid = this._validateToken(jwt) && jwtT.Expire >= DateTime.now.getMillis
-    }
-    jwtT
-  }
-
-  private def _validateToken(jwt: String): Boolean = {
-    JsonWebToken.validate(jwt, this._secret)
-  }
-
-  private def _claims(jwt: String): Option[String] =
-    jwt match {
-      case JsonWebToken(header, claimsSet, signature) => Option(claimsSet.asJsonString)
-      case _ => None
-    }
-
-  private def _getJwtBody(jwt: String): JWT = {
-    var jwtT = JWT()
-    val token = this._extractToken(jwt)
-    if (token.isDefined) {
-      jwtT = this._getJwtClaims(token.get)
+      jwtT.Password = (claimsVal \ "password").as[String]
+      jwtT.Detail = (claimsVal \ "detail").as[String]
+      jwtT.IsValid = jwtT.Expire >= DateTime.now.getMillis
     }
     jwtT
   }
