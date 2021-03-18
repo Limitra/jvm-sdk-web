@@ -11,7 +11,7 @@ Table of Contents
 Limitra Sdk-Web
 =======
 
-[![Maven Central](https://img.shields.io/maven-central/v/com.limitra.sdk/web_2.12.svg?label=Maven%20Central)](https://search.maven.org/search?q=g:%22com.limitra.sdk%22%20AND%20a:%22web_2.12%22)
+[![Maven Central](https://img.shields.io/maven-central/v/com.limitra.sdk/web_2.13.svg?label=Maven%20Central)](https://search.maven.org/search?q=g:%22com.limitra.sdk%22%20AND%20a:%22web_2.13%22)
 
 Limitra JVM Sdk Web provides practical and optimized results by adapting server-side web operations to full-stack development techniques. 
 
@@ -22,58 +22,58 @@ Apache Maven
 ````Maven
 <dependency>
   <groupId>com.limitra.sdk</groupId>
-  <artifactId>web_2.12.12</artifactId>
-  <version>0.0.12</version>
+  <artifactId>web_2.13.12</artifactId>
+  <version>0.0.14</version>
 </dependency>
 ````
 
 Gradle Groovy DSL
 ````Gradle Groovy DSL
-implementation 'com.limitra.sdk:web_2.12.12:0.0.12'
+implementation 'com.limitra.sdk:web_2.13.12:0.0.14'
 ````
 
 Gradle Kotlin DSL
 ````Gradle Kotlin DSL
-compile("com.limitra.sdk:web_2.12.12:0.0.12")
+compile("com.limitra.sdk:web_2.13.12:0.0.14")
 ````
 
 Scala SBT
 ````Scala SBT
-libraryDependencies += "com.limitra.sdk" %% "web_2.12.12" % "0.0.12"
+libraryDependencies += "com.limitra.sdk" %% "web_2.13.12" % "0.0.14"
 ````
 
 Apache Ivy
 ````Apache Ivy
-<dependency org="com.limitra.sdk" name="web_2.12.12" rev="0.0.12" />
+<dependency org="com.limitra.sdk" name="web_2.13.12" rev="0.0.14" />
 ````
 
 Groovy Grape
 ````Groovy Grape
 @Grapes(
-  @Grab(group='com.limitra.sdk', module='web_2.12.12', version='0.0.12')
+  @Grab(group='com.limitra.sdk', module='web_2.13.12', version='0.0.14')
 )
 ````
 
 Leiningen
 ````Leiningen
-[com.limitra.sdk/web_2.12.12 "0.0.12"]
+[com.limitra.sdk/web_2.13.12 "0.0.14"]
 ````
 
 Apache Buildr
 ````Apache Buildr
-'com.limitra.sdk:web_2.12.12:jar:0.0.12'
+'com.limitra.sdk:web_2.13.12:jar:0.0.14'
 ````
 
 PURL
 ````PURL
-pkg:maven/com.limitra.sdk/web_2.12.12@0.0.12
+pkg:maven/com.limitra.sdk/web_2.13.12@0.0.14
 ````
 
 Bazel
 ````Bazel
 maven_jar(
-    name = "web_2.12.12",
-    artifact = "com.limitra.sdk:web_2.12.12:0.0.12",
+    name = "web_2.13.12",
+    artifact = "com.limitra.sdk:web_2.13.12:0.0.14",
     sha1 = "6d3e606a6b61ea9295884efa7bca40392f5b5f1e",
 )
 ````

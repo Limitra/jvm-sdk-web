@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 
-cd /hdd/dev/limitra/limitra-sdk/jvm/jvm-database
+cd /limitra/project/dev/limitra_sdk/jvm/jvm-database
 ./assembly.sh
-cd /hdd/dev/limitra/limitra-sdk/jvm/jvm-web
+cd /limitra/project/dev/limitra_sdk/jvm/jvm-web
 
 mv build.sbt proj-build.sbt #Backup original build.sbt.
 cp proj-build.sbt build.sbt #Copy build.sbt for include assembly config.
