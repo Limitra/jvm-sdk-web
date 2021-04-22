@@ -2,8 +2,8 @@ package com.limitra.sdk.web.extension
 
 import com.limitra.sdk.web._
 import com.limitra.sdk.web.definition._
-import play.api.data._
 import play.api.data.FormBinding.Implicits._
+import play.api.data._
 import play.api.mvc.{Request, Result, Results}
 
 import scala.concurrent.{ExecutionContext, Future}

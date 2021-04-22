@@ -1,16 +1,15 @@
 package com.limitra.sdk.web.controller
 
-import java.io.File
-import java.text.SimpleDateFormat
-
 import com.limitra.sdk.core._
 import com.limitra.sdk.web.definition.FileUploadResult
-import javax.inject._
 import org.joda.time.DateTime
+import play.api.libs.Files
 import play.api.libs.json._
 import play.api.mvc._
-import play.api.libs.Files
 
+import java.io.File
+import java.text.SimpleDateFormat
+import javax.inject._
 import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton

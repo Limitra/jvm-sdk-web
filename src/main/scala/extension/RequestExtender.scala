@@ -3,7 +3,7 @@ package com.limitra.sdk.web.extension
 import com.limitra.sdk.database.mysql.DbSource
 import com.limitra.sdk.web._
 import com.limitra.sdk.web.definition._
-import play.api.libs.json.{JsValue, Writes}
+import play.api.libs.json.Writes
 import play.api.mvc.{Request, Result}
 import slick.lifted.{MappedProjection, Query}
 
