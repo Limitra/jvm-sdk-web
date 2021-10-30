@@ -44,9 +44,7 @@ final class FormExtender[A](value: Form[A])(implicit request: Request[_]) {
           }
           Results.BadRequest(result.ToJson)
         },
-        form => {
-          call(form, this._defSuccess)
-        }
+        form => { call(form, this._defSuccess) }
       )
     } else { Results.EmptyContent }
   }
@@ -62,9 +60,7 @@ final class FormExtender[A](value: Form[A])(implicit request: Request[_]) {
           }
           Future { Results.BadRequest(result.ToJson) }
         },
-        form => {
-          call(form, this._defSuccess)
-        }
+        form => { call(form, this._defSuccess) }
       )
     } else { Results.EmptyContent }
   }
