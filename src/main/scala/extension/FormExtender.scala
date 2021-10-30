@@ -33,35 +33,29 @@ final class FormExtender[A](value: Form[A])(implicit request: Request[_]) {
     }
   }
 
-  def ToJsonResult[B <: AnyContent](call: (A, JsonResult) => Result, errCall: (Form[A], JsonResult) => Unit = null)(implicit request: Request[B]) = {
-    val body = request.body.asJson
-    if (body.isDefined) {
-      value.bind(request.body.asJson.get, Long.MaxValue).fold(
-        error => {
-          val result = this._defError
-          if (errCall != null) {
-            errCall(error, result)
-          }
-          Results.BadRequest(result.ToJson)
-        },
-        form => { call(form, this._defSuccess) }
-      )
-    } else { Results.EmptyContent }
+  def ToJsonResult[B](call: (A, JsonResult) => Result, errCall: (Form[A], JsonResult) => Unit = null, js: Option[JsValue] = None)(implicit request: Request[B]) = {
+    (if (js.isDefined) value.bind(js.get, Long.MaxValue) else value.bindFromRequest).fold(
+      error => {
+        val result = this._defError
+        if (errCall != null) {
+          errCall(error, result)
+        }
+        Results.BadRequest(result.ToJson)
+      },
+      form => { call(form, this._defSuccess) }
+    )
   }
 
-  def ToJsonResultAsync[B <: AnyContent](call: (A, JsonResult) => Future[Result], errCall: (Form[A], JsonResult) => Unit = null)(implicit request: Request[B], ec: ExecutionContext) = {
-    val body = request.body.asJson
-    if (body.isDefined) {
-      value.bind(request.body.asJson.get, Long.MaxValue).fold(
-        error => {
-          val result = this._defError
-          if (errCall != null) {
-            errCall(error, result)
-          }
-          Future { Results.BadRequest(result.ToJson) }
-        },
-        form => { call(form, this._defSuccess) }
-      )
-    } else { Results.EmptyContent }
+  def ToJsonResultAsync[B](call: (A, JsonResult) => Future[Result], errCall: (Form[A], JsonResult) => Unit = null, js: Option[JsValue] = None)(implicit request: Request[B], ec: ExecutionContext) = {
+    (if (js.isDefined) value.bind(js.get, Long.MaxValue) else value.bindFromRequest).fold(
+      error => {
+        val result = this._defError
+        if (errCall != null) {
+          errCall(error, result)
+        }
+        Future { Results.BadRequest(result.ToJson) }
+      },
+      form => { call(form, this._defSuccess) }
+    )
   }
 }
