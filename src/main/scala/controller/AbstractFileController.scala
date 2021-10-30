@@ -122,7 +122,8 @@ abstract class AbstractFileController(cc: ControllerComponents, ca: ActionBuilde
     file.ref.copyTo(new File(targetPath))
 
     Future.successful(Ok(Json.toJson(new FileUploadResult {
-      Path = ("/" + targetPath.replace(sourcePath, "")).replace("//", "/");
+      url = ("/" + targetPath.replace(sourcePath, "")).replace("//", "/");
+      Path = this.url;
       Name = fileName;
       Type = file.contentType;
       Size = file.fileSize;
