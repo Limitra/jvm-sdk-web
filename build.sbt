@@ -1,6 +1,6 @@
 name := "web"
 
-version := "0.0.23"
+version := "0.0.24"
 scalaVersion := "2.13.6"
 
 libraryDependencies ++= Seq(
